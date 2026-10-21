@@ -10,6 +10,10 @@ The project is four repositories kept side by side in one folder: `grandstack` (
 - [Architecture](docs/architecture.md): components, data model, request flow, design decisions
 - [Build your own app](docs/build-your-own-app.md): replace the data and build a typed front end (worked example: Books)
 
+## Diagrams
+
+Annotated architecture diagrams are SVG files in each repository's `docs/diagrams/` folder (for this repository: system overview, data model, and the default-versus-auth comparison). Every figure is embedded with a numbered text legend, so the same information is available without viewing the image.
+
 ## This repository
 
 - [README](README.md): quickstart and documentation map

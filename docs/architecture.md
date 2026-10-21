@@ -2,24 +2,20 @@
 
 GRANDstack is a way to build apps on a Neo4j graph with GraphQL: a Neo4j database, a GraphQL server generated from a schema file, and a React client with typed operations. The **A** now stands for **Agent**: the same GraphQL API that serves the web app is meant to serve coding agents and agentic apps too. Apollo has been removed; the pieces are Neo4j's GraphQL library, GraphQL Yoga and open-source libraries that run locally in Docker.
 
-This guide describes what is built today (versions: grandstack-server v0.7.0, grandstack-web v0.5.0, grandstack-auth v0.1.0, grandstack v0.7.0). What is planned is on the [roadmap](roadmap.md).
+This guide describes what is built today (versions: grandstack-server v0.7.1, grandstack-web v0.5.1, grandstack-auth v0.1.1, grandstack v0.7.1). What is planned is on the [roadmap](roadmap.md).
 
 ## Components
 
-```
-  Browser                      Docker (compose)
- +-----------------+      +---------------------------------------------+
- | React app       |      | web      nginx, static files          :3000 |
- | grandstack-web  |<-----|                                             |
- |                 |      | server   Node, GraphQL Yoga,          :4000 |
- | urql, typed ops |----->|          @neo4j/graphql v7                  |
- +-----------------+      |          (grandstack-server)                |
-   POST /graphql          |             |                               |
-                          |             | Bolt                          |
-                          |             v                               |
-                          | neo4j    Neo4j community        :7474 :7687 |
-                          +---------------------------------------------+
-```
+[![System overview: the browser loads static files from the web container on port 3000, then sends GraphQL requests directly to the server on port 4000, which talks to Neo4j over Bolt.](diagrams/system-overview.svg)](diagrams/system-overview.svg)
+
+*Figure: the default stack. The browser gets static files from one container and talks to the GraphQL server directly. Click the image for full size; the numbered notes below carry the same information as text.*
+
+1. **Static files only.** The `web` container serves the built app with nginx (falling back to `index.html` for client-side routes). It never calls the server.
+2. **Direct GraphQL.** The browser POSTs to `http://localhost:4000/graphql`. That URL is fixed when the web image is built (`VITE_GRAPHQL_URL`), and the server's `CORS_ORIGIN` must allow the web origin.
+3. **The schema file is the API.** `schema/schema.graphql` and the environment variables are read once at start. There are no resolvers to write.
+4. **Cypher over Bolt.** `@neo4j/graphql` translates each request into Cypher and runs it on the one database (`neo4j`; community edition has a single database).
+5. **Counts plugin.** After every mutation the server recalculates the stored film counts on people, before it replies, so a refetch is correct.
+6. **Seed on start.** The Movies seed is loaded into an empty database, or reloaded when the seed file's version is newer; data the server did not load is left alone.
 
 - The **browser** loads the static app from `web` (port 3000) and sends GraphQL requests **directly** to `server` (port 4000). `web` does not proxy; the server allows the web origin with CORS.
 - The **server** has no resolvers. It reads `schema/schema.graphql`, and `@neo4j/graphql` generates the API and translates each request into Cypher.
@@ -34,11 +30,15 @@ This guide describes what is built today (versions: grandstack-server v0.7.0, gr
 
 ## Data model (the sample)
 
-```
-(Person)-[:ACTED_IN {roles: [String]}]->(Movie)<-[:DIRECTED]-(Person)
-                                         (Movie)-[:IN_GENRE]->(Genre)
-(SeedMeta {name, version})   marker for seed versioning, not part of the API
-```
+[![Data model: Person acted in and directed Movie, Movie is in Genre; Review and User come from the auth setup. Person counts are stored and derived, Movie.similar and Person.collaborators are computed.](diagrams/data-model.svg)](diagrams/data-model.svg)
+
+*Figure: the sample data model. Dashed boxes exist only in the auth setup. Click the image for full size; the numbered notes below carry the same information as text.*
+
+1. **Roles live on the relationship.** `ACTED_IN` carries a `roles` list as a relationship property. Titles and names are unique keys (constraints), so there are no ids.
+2. **Stored but derived.** `actedCount` and `directedCount` are real properties so people can be sorted and filtered in plain GraphQL; the counts plugin keeps them correct.
+3. **Computed on request.** `Person.collaborators` runs a Cypher traversal ranked by shared films and returns a name and a count. It cannot be sorted or filtered.
+4. **Computed on request.** `Movie.similar` scores films by shared director (3 points), cast (2) and genre (1).
+5. **Auth setup only.** `Review` and `User` come from `grandstack-auth`'s schema extension. A review's author is taken from the token.
 
 - **Movie**: `title` (unique), `tagline`, `released`, `rating` (0 to 10), `runtime` (minutes).
 - **Person**: `name` (unique), `born`, and the stored counts `actedCount` and `directedCount`.
@@ -63,17 +63,15 @@ Example: the user ticks the Drama genre on `/movies`.
 
 The default stack above is open. Adding `compose.auth.yaml` puts a gateway in front of the server and adds Keycloak and a demo client:
 
-```
-  Browser (demo client :3001, or any client)
-       |  OIDC login                      Authorization: Bearer <token>
-       v                                              |
-  Keycloak :8081  <-- JWKS (public keys) --+          v
-  (dev realm, demo users)                  |   Gateway :4000 (Hive Gateway, proxy mode)
-                                           |     validates the token, applies permissions per mutation
-                                           |            |  forwards Authorization
-                                           +--> Server (not published to the host)
-                                                  verifies the token again, applies row-level rules --> Neo4j
-```
+[![Before and after: the default stack versus the stack with compose.auth.yaml, which adds a gateway in front, Keycloak, and removes the server's host port; grandstack-web is unchanged and becomes anonymous.](diagrams/open-vs-auth.svg)](diagrams/open-vs-auth.svg)
+
+*Figure: what `compose.auth.yaml` changes. New services are outlined in bold; the red dashed path is the one that disappears. Click the image for full size; the numbered notes below carry the same information as text.*
+
+1. **Gateway in front.** It becomes the public GraphQL endpoint on port 4000, validates every token and checks permissions per mutation, then forwards the `Authorization` header.
+2. **Keycloak beside it.** It logs users in (OIDC code + PKCE) and signs tokens; the gateway and the server fetch its public keys (JWKS).
+3. **Server no longer published.** The browser can no longer reach it directly. It also verifies the token again and applies row-level rules.
+4. **`grandstack-web` unchanged.** It still calls port 4000, which is now the gateway, so it acts as an anonymous client: reads work, writes are refused.
+5. **Demo client added.** `auth-client` on port 3001 logs in and shows the rules at work.
 
 - **Reads are public; writes need a login.** Roles `user`, `editor`, `moderator` map to permissions at the gateway and to row rules on the server (only a review's author or a moderator can change it).
 - **Two independent checks:** the gateway answers "may this token call this mutation?"; the server answers "may it change this row?" and refuses unauthenticated writes even if reached directly.
