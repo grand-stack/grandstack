@@ -27,5 +27,15 @@ services:
       neo4j:
         condition: service_healthy
 
+  web:
+    build:
+      context: ../grandstack-web
+      args:
+        VITE_GRAPHQL_URL: http://localhost:4000/graphql
+    ports:
+      - "3000:8080"
+    depends_on:
+      - server
+
 volumes:
   neo4j-data:

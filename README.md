@@ -7,7 +7,8 @@ cp .env.example .env
 docker compose up --build
 ```
 
+- Web app: http://localhost:3000
 - GraphQL: http://localhost:4000/graphql
 - Neo4j Browser: http://localhost:7474 (user `neo4j`, password from `.env`)
 
-Phase 1 includes Neo4j and [grandstack-server](../grandstack-server). Web, auth, agents and federation arrive in later phases as compose profiles. See [AGENTS.md](AGENTS.md).
+Includes Neo4j, [grandstack-server](../grandstack-server) and [grandstack-web](../grandstack-web). Auth, agents and federation arrive in later phases as compose profiles. See [AGENTS.md](AGENTS.md).
