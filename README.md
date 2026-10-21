@@ -11,4 +11,4 @@ docker compose up --build
 - GraphQL: http://localhost:4000/graphql
 - Neo4j Browser: http://localhost:7474 (user `neo4j`, password from `.env`)
 
-Includes Neo4j, [grandstack-server](../grandstack-server) and [grandstack-web](../grandstack-web). Auth, agents and federation arrive in later phases as compose profiles. See [AGENTS.md](AGENTS.md).
+Includes Neo4j, [grandstack-server](../grandstack-server) and [grandstack-web](../grandstack-web): a movie search app with faceted filters, compare, a graph view and recommendations over 152 sample films. Auth
