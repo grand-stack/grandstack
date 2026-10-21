@@ -8,9 +8,10 @@ Every repository uses **semantic versions as git tags** (`v0.6.0`). A change tha
 
 | Repository | Latest tag | Notes |
 | --- | --- | --- |
-| `grandstack-server` | `v0.6.0` | Adds `SEED_PROBE_LABEL` and `REFRESH_COUNTS`, schema reference generator, docs |
+| `grandstack-server` | `v0.7.0` | Adds the generic auth settings (`AUTH_*`, `SCHEMA_EXTRA_PATHS`, `SETUP_CYPHER_PATHS`); earlier: `SEED_PROBE_LABEL`, `REFRESH_COUNTS`, schema reference generator, docs |
 | `grandstack-web` | `v0.5.0` | Docs, shared `hash` and `initials` helpers, browser end-to-end script |
-| `grandstack` | `v0.6.0` | Docs, tutorial, agent guide |
+| `grandstack-auth` | `v0.1.0` | Gateway, Keycloak dev realm, auth schema rules, demo client, smoke and browser tests, the exercise and its reference patch (made against `grandstack-web` v0.5.0) |
+| `grandstack` | `v0.7.0` | `compose.auth.yaml` (opt-in auth), docs |
 
 The versions that were tested together are the ones in this table. All tags are **local so far**: nothing is pushed or published, and no images are in a registry.
 
@@ -24,6 +25,7 @@ The versions that were tested together are the ones in this table. All tags are 
 1. Make sure the working tree is clean and the checks pass:
    - server: `npm run lint && npm test && npm run schema:check && npm run docs:check`
    - web: `npm run typecheck && npm test && npm run docs:check`, and with a freshly seeded stack `npm run e2e`
+   - auth: unit tests in `gateway/` and `client/`, `npm run docs:check`, `npm run verify-exercise`, and with the auth stack running `npm run smoke` and `npm run e2e`
 2. If the server schema changed, run `npm run docs:schema` and commit the updated reference.
 3. Update the version references in the READMEs and in this file.
 4. Commit, then tag: `git tag v0.X.Y`.

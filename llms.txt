@@ -1,8 +1,8 @@
 # GRANDstack
 
-> GraphQL on Neo4j for developers and agents. A Neo4j database, a GraphQL server generated from a schema file (`@neo4j/graphql` v7 on GraphQL Yoga), and a typed React app, run together with Docker Compose. The sample is a movie and people search, compare and edit app. There is no authentication yet; do not expose it publicly.
+> GraphQL on Neo4j for developers and agents. A Neo4j database, a GraphQL server generated from a schema file (`@neo4j/graphql` v7 on GraphQL Yoga), and a typed React app, run together with Docker Compose. The sample is a movie and people search, compare and edit app. The default stack has no authentication; an opt-in setup adds Keycloak login, a gateway and row-level rules. Do not expose either publicly.
 
-The project is three repositories kept side by side in one folder: `grandstack` (this one: compose, overview, tutorial, agent guide), `grandstack-server` and `grandstack-web`. Each has its own `docs/` folder.
+The project is four repositories kept side by side in one folder: `grandstack` (this one: compose, overview, tutorial, agent guide), `grandstack-server`, `grandstack-web` and `grandstack-auth` (optional auth). Each has its own `docs/` folder.
 
 ## Start here
 
@@ -15,9 +15,10 @@ The project is three repositories kept side by side in one folder: `grandstack` 
 - [README](README.md): quickstart and documentation map
 - [Configuration](docs/configuration.md): compose services, ports, settings, Podman, resetting data
 - [Versioning and releases](docs/versioning-and-releases.md): tags, what is released, how to cut a release
-- [Roadmap](docs/roadmap.md): planned phases (not built yet): auth, agents and MCP, federation, site
+- [Roadmap](docs/roadmap.md): phase status; planned (not built yet): agents and MCP, federation, site
 
 ## Other repositories (paths inside each repository)
 
 - grandstack-server `docs/how-it-works.md`, `docs/schema-guide.md`, `docs/schema-reference.md` (generated), `docs/mutations.md`, `docs/seeding.md`, `docs/configuration.md`, `docs/recipes.md`, `docs/troubleshooting.md`, `AGENTS.md`
 - grandstack-web `docs/architecture.md`, `docs/features.md`, `docs/customising.md`, `docs/recipes.md`, `docs/testing.md`, `e2e/README.md`, `AGENTS.md`
+- grandstack-auth `docs/how-it-works.md`, `docs/role-and-scope-model.md`, `docs/keycloak.md`, `docs/client.md`, `docs/recipes.md`, `docs/testing.md`, `docs/swapping-providers.md`, `docs/auth0.md` (untested), `docs/troubleshooting.md`, `docs/exercise-add-auth-to-grandstack-web.md` (a follow-up exercise), `AGENTS.md`

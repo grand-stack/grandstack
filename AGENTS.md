@@ -6,5 +6,5 @@ Compose stack plus the overview docs for GRANDstack (GraphQL on Neo4j: `grandsta
 - `docker compose down -v` deletes the Neo4j data; the sample reseeds on the next start.
 - Change the schema, seed or server behaviour in `grandstack-server`; change the UI in `grandstack-web`; follow each repo's `AGENTS.md` and `docs/recipes.md`.
 - Before you finish, run the checks for each repo you changed (listed in [docs/agents.md](docs/agents.md#verification-checklist)) and `node scripts/check-links.mjs` here.
-- There is no authentication. Do not expose the stack publicly.
+- The default stack has no authentication. The opt-in auth setup (`docker compose -f compose.yaml -f compose.auth.yaml up --build`, from the `grandstack-auth` repo) is development-only. Do not expose either publicly.
 - Keep docs true: update the doc next to the behaviour you change, in the same change.

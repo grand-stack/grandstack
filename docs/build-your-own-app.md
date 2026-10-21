@@ -288,6 +288,15 @@ Use the web repo's `docs/recipes.md` for the patterns, adapted to your entities:
 - **Computed fields:** add `@cypher` fields like `Movie.similar` (see `docs/schema-guide.md` in `grandstack-server`).
 - Keep the server's rules in mind: describe every field, bump the seed version, and update relationships as diffs.
 
+## Adding login to your app
+
+The auth setup in `grandstack-auth` is not tied to Movies. The pieces you would reuse:
+
+- **The gateway** (`gateway/`) is generic: point `UPSTREAM_URL` at your server, set the issuer, audience and JWKS URL, and list your mutations in `MUTATION_PERMISSIONS` in `gateway/rules.ts` with the permission each needs (unknown mutations are refused).
+- **Row-level rules** live in an extra schema file for your own types (see `schema/auth.graphql` for `filter` rules, `$jwt.sub` comparisons and the "author comes from the token" pattern). The server loads it with `SCHEMA_EXTRA_PATHS` and verifies tokens when the three `AUTH_*` variables are set. Mind the v7 pitfalls: `validate` rules and `DateTime` need APOC.
+- **Roles and users** come from your identity provider; the dev realm file shows the Keycloak side, and `docs/swapping-providers.md` lists what to change for another provider.
+- **A front end** needs an OpenID Connect client; `grandstack-auth/docs/exercise-add-auth-to-grandstack-web.md` walks through it.
+
 ## What is Movies-specific and what is not
 
 | Reusable as is | Pattern to copy | Movies-specific |

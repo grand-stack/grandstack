@@ -1,0 +1,72 @@
+# Adds authentication to the stack. Use together with compose.yaml:
+#   docker compose -f compose.yaml -f compose.auth.yaml up --build
+# DEVELOPMENT ONLY: Keycloak runs in dev mode with a demo realm, demo users and known passwords.
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.1
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      # The browser-facing URL. Fixing it makes the token issuer (iss) the same wherever the token is requested from.
+      KC_HOSTNAME: http://localhost:8081
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+    volumes:
+      - ../grandstack-auth/keycloak/grandstack-realm.json:/opt/keycloak/data/import/grandstack-realm.json:ro
+    ports:
+      - "8081:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 20s
+
+  server:
+    # Not published to the host in the auth setup: the gateway is the front door.
+    ports: !reset []
+    environment:
+      AUTH_JWKS_URL: http://keycloak:8080/realms/grandstack/protocol/openid-connect/certs
+      AUTH_ISSUER: http://localhost:8081/realms/grandstack
+      AUTH_AUDIENCE: grandstack-api
+      SCHEMA_EXTRA_PATHS: /app/schema/auth.graphql
+      SETUP_CYPHER_PATHS: /app/schema/auth-setup.cypher
+    volumes:
+      - ../grandstack-auth/schema/auth.graphql:/app/schema/auth.graphql:ro
+      - ../grandstack-auth/schema/auth-setup.cypher:/app/schema/auth-setup.cypher:ro
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4000/graphql?query=%7B__typename%7D').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 10s
+
+  gateway:
+    build: ../grandstack-auth/gateway
+    environment:
+      UPSTREAM_URL: http://server:4000/graphql
+      AUTH_JWKS_URL: http://keycloak:8080/realms/grandstack/protocol/openid-connect/certs
+      AUTH_ISSUER: http://localhost:8081/realms/grandstack
+      AUTH_AUDIENCE: grandstack-api
+      CORS_ORIGIN: http://localhost:3000,http://localhost:3001
+    ports:
+      - "4000:4000"
+    depends_on:
+      server:
+        condition: service_healthy
+
+  auth-client:
+    build:
+      context: ../grandstack-auth/client
+      args:
+        VITE_GRAPHQL_URL: http://localhost:4000/graphql
+        VITE_OIDC_AUTHORITY: http://localhost:8081/realms/grandstack
+        VITE_OIDC_CLIENT_ID: grandstack-auth-client
+    ports:
+      - "3001:8080"
+    depends_on:
+      - gateway

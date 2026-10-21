@@ -9,7 +9,7 @@ For coding agents (Claude Code or any other) and the people directing them. It s
 3. State a user may want to share (filters) lives in the URL.
 4. Sample data comes from a versioned Cypher seed; titles and names are unique keys.
 5. Writes go through generated mutations; a server plugin keeps stored film counts correct.
-6. There is **no authentication** yet, and the app can edit and delete everything.
+6. The default stack has **no authentication**, and the app can edit and delete everything. An opt-in setup (`compose.auth.yaml`, the `grandstack-auth` repo) adds login, a gateway and row-level rules; `grandstack-web` is intentionally not part of it.
 
 ## Notes on setup
 
@@ -26,6 +26,8 @@ For coding agents (Claude Code or any other) and the people directing them. It s
 | Show a field, add a filter, page or form | `grandstack-web/src/` | web checks |
 | Change look and feel | `grandstack-web/src/theme/tokens.css`, `src/styles.css` | web checks |
 | Change ports, services or settings of the stack | `grandstack/compose.yaml` | `docker compose up --build` |
+| Change who can do what (roles, permissions, rules) | `grandstack-auth` (`gateway/rules.ts`, `schema/auth.graphql`, `keycloak/grandstack-realm.json`) | its smoke script and tests |
+| Add login to a front end | follow `grandstack-auth/docs/exercise-add-auth-to-grandstack-web.md` in your own copy | its acceptance check |
 | Use your own dataset | see [build your own app](build-your-own-app.md) | |
 
 Each repository has recipes for the common changes: `docs/recipes.md` in `grandstack-server` and in `grandstack-web`. Start there.
@@ -54,6 +56,9 @@ npm run codegen && npm run typecheck && npm test && npm run docs:check
 
 # grandstack-web browser checks (freshly seeded stack; creates and deletes ZZ-prefixed test data)
 npm run e2e
+
+# grandstack-auth (unit tests in gateway/ and client/; with the auth stack running)
+npm run docs:check && npm run smoke && npm run e2e
 ```
 
 `schema:check` needs a git checkout with the schema committed at `HEAD` (commit the baseline before you edit). `docs:check` fails until you have run `npm run docs:schema` after a schema change; commit the regenerated reference.
@@ -91,7 +96,8 @@ Every type and field defined in the schema has a description (lint enforces it),
 - **Do not add `@neo4j-ndl/*`** to the web app: it is GPL-3.0 and the repo is Apache-2.0.
 - **`VITE_GRAPHQL_URL` is fixed at build time** and must be reachable from the browser; the server's `CORS_ORIGIN` must allow the web origin.
 - **Text inputs that write to the URL need local state and a debounce**, or fast typing drops characters.
-- **Never expose the stack publicly.** There is no auth, and the data can be edited or deleted by anyone.
+- **Never expose the stack publicly.** The default stack has no auth, and the auth setup is development-only (demo realm, known passwords, plain HTTP).
+- **Auth:** a new mutation must be added to `MUTATION_PERMISSIONS` in `grandstack-auth/gateway/rules.ts` or the gateway refuses it; server rules must be `filter` (not `validate`) and avoid `DateTime` (both need APOC); `AUTH_ISSUER` is the browser-facing URL while `AUTH_JWKS_URL` is the container-reachable one; realm edits need a recreated Keycloak. More in `grandstack-auth/AGENTS.md`.
 - **Commit generated files when they change:** `grandstack-web/src/graphql/generated/` and `grandstack-server/docs/schema-reference.md`.
 
 ## Keep the docs true

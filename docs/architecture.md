@@ -2,7 +2,7 @@
 
 GRANDstack is a way to build apps on a Neo4j graph with GraphQL: a Neo4j database, a GraphQL server generated from a schema file, and a React client with typed operations. The **A** now stands for **Agent**: the same GraphQL API that serves the web app is meant to serve coding agents and agentic apps too. Apollo has been removed; the pieces are Neo4j's GraphQL library, GraphQL Yoga and open-source libraries that run locally in Docker.
 
-This guide describes what is built today (versions: grandstack-server v0.6.0, grandstack-web v0.5.0, grandstack v0.6.0). What is planned is on the [roadmap](roadmap.md).
+This guide describes what is built today (versions: grandstack-server v0.7.0, grandstack-web v0.5.0, grandstack-auth v0.1.0, grandstack v0.7.0). What is planned is on the [roadmap](roadmap.md).
 
 ## Components
 
@@ -29,7 +29,8 @@ This guide describes what is built today (versions: grandstack-server v0.6.0, gr
 | --- | --- | --- |
 | `grandstack` (this one) | Compose stack, overview, tutorial, agent guide | here |
 | `grandstack-server` | The GraphQL server image | `docs/` in that repo |
-| `grandstack-web` | The React app | `docs/` in that repo |
+| `grandstack-web` | The React app (open, no login) | `docs/` in that repo |
+| `grandstack-auth` | Optional: gateway, Keycloak dev realm, auth rules, demo client | `docs/` in that repo |
 
 ## Data model (the sample)
 
@@ -58,6 +59,28 @@ Example: the user ticks the Drama genre on `/movies`.
 4. `@neo4j/graphql` translates it to Cypher, runs it on Neo4j, and shapes the rows into the response, including genre and decade counts computed with the *other* filters applied.
 5. The component renders typed data. If it was a mutation, a server plugin first recalculates the stored film counts, so the refetch is correct.
 
+## Authentication (opt-in)
+
+The default stack above is open. Adding `compose.auth.yaml` puts a gateway in front of the server and adds Keycloak and a demo client:
+
+```
+  Browser (demo client :3001, or any client)
+       |  OIDC login                      Authorization: Bearer <token>
+       v                                              |
+  Keycloak :8081  <-- JWKS (public keys) --+          v
+  (dev realm, demo users)                  |   Gateway :4000 (Hive Gateway, proxy mode)
+                                           |     validates the token, applies permissions per mutation
+                                           |            |  forwards Authorization
+                                           +--> Server (not published to the host)
+                                                  verifies the token again, applies row-level rules --> Neo4j
+```
+
+- **Reads are public; writes need a login.** Roles `user`, `editor`, `moderator` map to permissions at the gateway and to row rules on the server (only a review's author or a moderator can change it).
+- **Two independent checks:** the gateway answers "may this token call this mutation?"; the server answers "may it change this row?" and refuses unauthenticated writes even if reached directly.
+- The server stays auth-agnostic: it only gets generic settings (`AUTH_*` to verify tokens, `SCHEMA_EXTRA_PATHS` to load extra schema). The `User` and `Review` types and every rule live in `grandstack-auth` and are mounted in.
+- **`grandstack-web` is deliberately unchanged.** Through the gateway it is an anonymous client: reading works, writing is refused. Adding login to it is a documented exercise in `grandstack-auth`.
+- Details, roles, responses and what to change for production: the `grandstack-auth` repository's `docs/how-it-works.md`.
+
 ## Design decisions and why
 
 | Decision | Reason |
@@ -75,9 +98,14 @@ Example: the user ticks the Drama genre on `/movies`.
 | `react-force-graph-2d` for graph views | MIT-licensed; Neo4j's own NVL has a custom licence. |
 | Separate repos, versioned with semver tags | Each piece can be cloned and used alone; the umbrella records which versions work together. |
 | Community Neo4j, database `neo4j` | It runs locally with no licence; community supports a single database. |
+| Auth as a gateway plus server rules, in its own repo, opt-in | Authentication is orthogonal to the app: the gateway can front any GraphQL server, the server stays generic, the default quickstart stays zero-config, and `grandstack-web` shows what an app looks like before login. |
+| Both the gateway and the server verify the token | Defence in depth: the server is safe even if reached directly. |
+| Permissions at the gateway are derived from roles | Keycloak grants OAuth scopes per client, not per user, so roles are what differ between users; the gateway also accepts `permissions` and `scope` claims for other providers. |
+| Row-level `filter` rules, not `validate`; ISO strings, not `DateTime` | `validate` rules and `DateTime` reads need Neo4j's APOC plugin, which this stack does not include. |
+| Reviews are created by a custom mutation using the token's `sub` | The author cannot be spoofed because clients cannot pass one; the generated create is removed. |
 
 ## Limits today
 
-- **No authentication.** Anyone who can reach the server can read, create, edit and delete everything. Do not expose the stack publicly. Authentication is on the [roadmap](roadmap.md).
+- **The default stack has no authentication.** Anyone who can reach the server can read, create, edit and delete everything. Do not expose it publicly. The opt-in auth setup is development-only too (Keycloak dev mode, demo users, plain HTTP); see `grandstack-auth` for what production would need.
 - The compose file builds the server and web images from sibling checkouts; it does not pull published images yet ([versioning](versioning-and-releases.md)).
 - Everything runs on one machine in Docker or Podman; there is no production deployment recipe.
