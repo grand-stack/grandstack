@@ -1,0 +1,39 @@
+# Versioning and releases
+
+## Scheme
+
+Every repository uses **semantic versions as git tags** (`v0.6.0`). A change that adds behaviour bumps the minor version while we are below 1.0; a fix or a docs-only change bumps the patch version. The server also publishes a Docker image whose tag matches the git tag.
+
+## What is released today
+
+| Repository | Latest tag | Notes |
+| --- | --- | --- |
+| `grandstack-server` | `v0.6.0` | Adds `SEED_PROBE_LABEL` and `REFRESH_COUNTS`, schema reference generator, docs |
+| `grandstack-web` | `v0.5.0` | Docs, shared `hash` and `initials` helpers, browser end-to-end script |
+| `grandstack` | `v0.6.0` | Docs, tutorial, agent guide |
+
+The versions that were tested together are the ones in this table. All tags are **local so far**: nothing is pushed or published, and no images are in a registry.
+
+## How the umbrella pins versions (today and planned)
+
+- **Today**, `compose.yaml` builds the server and web images from the sibling checkouts (`build: ../grandstack-server`). To get a known-good combination, check out the tags in the table in each repo.
+- **Planned:** once images are published, `compose.yaml` will reference image tags (for example `grandstack-server:0.6.0`), and the umbrella's own tag will name the set. That change is on the [roadmap](roadmap.md).
+
+## Cutting a release (per repo)
+
+1. Make sure the working tree is clean and the checks pass:
+   - server: `npm run lint && npm test && npm run schema:check && npm run docs:check`
+   - web: `npm run typecheck && npm test && npm run docs:check`, and with a freshly seeded stack `npm run e2e`
+2. If the server schema changed, run `npm run docs:schema` and commit the updated reference.
+3. Update the version references in the READMEs and in this file.
+4. Commit, then tag: `git tag v0.X.Y`.
+5. Server: build the image with the same tag (`docker build -t grandstack-server:0.X.Y .`).
+6. Update the umbrella's table and tag the umbrella last.
+
+## Breaking changes
+
+For the GraphQL API, `npm run schema:check` in the server repo compares your schema with a git ref and fails on breaking changes (a removed field, a changed type). For the web app, `npm run codegen` fails when an operation no longer matches the server schema. Treat either as a signal to bump the minor version and note it in the release.
+
+## Deprecated and old repositories
+
+The earlier `grand-stack` repositories are being replaced by these and will be made private and removed by their owner. Nothing here depends on them.

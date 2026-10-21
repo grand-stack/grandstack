@@ -1,0 +1,23 @@
+# GRANDstack
+
+> GraphQL on Neo4j for developers and agents. A Neo4j database, a GraphQL server generated from a schema file (`@neo4j/graphql` v7 on GraphQL Yoga), and a typed React app, run together with Docker Compose. The sample is a movie and people search, compare and edit app. There is no authentication yet; do not expose it publicly.
+
+The project is three repositories kept side by side in one folder: `grandstack` (this one: compose, overview, tutorial, agent guide), `grandstack-server` and `grandstack-web`. Each has its own `docs/` folder.
+
+## Start here
+
+- [Agent guide](docs/agents.md): mental model, where to change what, verification checklist, gotchas
+- [Architecture](docs/architecture.md): components, data model, request flow, design decisions
+- [Build your own app](docs/build-your-own-app.md): replace the data and build a typed front end (worked example: Books)
+
+## This repository
+
+- [README](README.md): quickstart and documentation map
+- [Configuration](docs/configuration.md): compose services, ports, settings, Podman, resetting data
+- [Versioning and releases](docs/versioning-and-releases.md): tags, what is released, how to cut a release
+- [Roadmap](docs/roadmap.md): planned phases (not built yet): auth, agents and MCP, federation, site
+
+## Other repositories (paths inside each repository)
+
+- grandstack-server `docs/how-it-works.md`, `docs/schema-guide.md`, `docs/schema-reference.md` (generated), `docs/mutations.md`, `docs/seeding.md`, `docs/configuration.md`, `docs/recipes.md`, `docs/troubleshooting.md`, `AGENTS.md`
+- grandstack-web `docs/architecture.md`, `docs/features.md`, `docs/customising.md`, `docs/recipes.md`, `docs/testing.md`, `e2e/README.md`, `AGENTS.md`
