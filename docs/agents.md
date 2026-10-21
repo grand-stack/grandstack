@@ -11,6 +11,10 @@ For coding agents (Claude Code or any other) and the people directing them. It s
 5. Writes go through generated mutations; a server plugin keeps stored film counts correct.
 6. There is **no authentication** yet, and the app can edit and delete everything.
 
+## Notes on setup
+
+`npm ci` prints `npm warn install-scripts ... approve` warnings; they are harmless. The package versions in `package.json` match the git tags.
+
 ## Where to change what
 
 | You want to... | Change | Then run |
@@ -44,12 +48,15 @@ Run what matches the repo you changed. All of it must pass before you call a cha
 # grandstack-server
 npm run lint && npm test && npm run schema:check && npm run docs:check
 
-# grandstack-web (the stack must be running for codegen)
+# grandstack-web (codegen needs a server running with the schema you want; it reads
+# GRAPHQL_URL, default http://localhost:4000/graphql)
 npm run codegen && npm run typecheck && npm test && npm run docs:check
 
 # grandstack-web browser checks (freshly seeded stack; creates and deletes ZZ-prefixed test data)
 npm run e2e
 ```
+
+`schema:check` needs a git checkout with the schema committed at `HEAD` (commit the baseline before you edit). `docs:check` fails until you have run `npm run docs:schema` after a schema change; commit the regenerated reference.
 
 For a server schema change also check the live API, for example:
 
