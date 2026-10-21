@@ -38,6 +38,9 @@ Each repository has recipes for the common changes: `docs/recipes.md` in `grands
 cd grandstack
 cp .env.example .env      # once
 docker compose up --build # web :3000, GraphQL :4000/graphql, Neo4j browser :7474
+
+# with login (development only): gateway :4000, Keycloak :8081, auth demo client :3001
+docker compose -f compose.yaml -f compose.auth.yaml up --build
 ```
 
 Wait for the server log line `GraphQL ready at http://localhost:4000/graphql`. Use `docker compose down -v` to reset the data to the sample.
@@ -57,8 +60,10 @@ npm run codegen && npm run typecheck && npm test && npm run docs:check
 # grandstack-web browser checks (freshly seeded stack; creates and deletes ZZ-prefixed test data)
 npm run e2e
 
-# grandstack-auth (unit tests in gateway/ and client/; with the auth stack running)
-npm run docs:check && npm run smoke && npm run e2e
+# grandstack-auth: unit tests, then (with the auth stack running) the token-level and browser checks
+(cd gateway && npm ci && npm test && npm run typecheck)
+(cd client && npm ci && npm test && npm run typecheck)
+npm ci && npm run docs:check && npm run smoke && npm run e2e
 ```
 
 `schema:check` needs a git checkout with the schema committed at `HEAD` (commit the baseline before you edit). `docs:check` fails until you have run `npm run docs:schema` after a schema change; commit the regenerated reference.

@@ -39,6 +39,7 @@ The first start builds the images and loads the sample data. Stop with `docker c
 Opt-in, development only. This adds Keycloak (login), a gateway that checks every token, row-level rules on the server, and a demo client with a permissions playground. `grandstack-web` is not changed; against the gateway it can read but not write.
 
 ```sh
+cp .env.example .env     # once, if you have not already
 docker compose -f compose.yaml -f compose.auth.yaml up --build
 ```
 
