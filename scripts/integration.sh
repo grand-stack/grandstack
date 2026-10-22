@@ -28,6 +28,8 @@ if [ -z "${CHROME_PATH:-}" ]; then
   CHROME_PATH="$(command -v google-chrome || command -v chromium || command -v chromium-browser || echo '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome')"
 fi
 export CHROME_PATH
+# the browser checks use fixed pauses; stretch them on CI runners, which are slower than a laptop
+if [ -n "${CI:-}" ]; then export SETTLE_SCALE="${SETTLE_SCALE:-3}"; fi
 
 # shellcheck disable=SC2086
 compose() { docker compose $files "$@"; }
