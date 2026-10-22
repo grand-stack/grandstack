@@ -19,6 +19,7 @@ Annotated architecture diagrams are SVG files in each repository's `docs/diagram
 - [README](README.md): quickstart and documentation map
 - [Configuration](docs/configuration.md): compose services, ports, settings, Podman, resetting data
 - [Versioning and releases](docs/versioning-and-releases.md): tags, what is released, how to cut a release
+- [Releasing, CI and the website](docs/releasing.md): GitHub workflows, the release button, images, website regeneration
 - [Roadmap](docs/roadmap.md): phase status; agents and federation are done; planned (not built yet): agent memory, site
 
 ## Other repositories (paths inside each repository)

@@ -1,0 +1,19 @@
+# Copyright (c) "Neo4j"
+# Neo4j Sweden AB [http://neo4j.com]
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  docs:
+    uses: grand-stack/.github/.github/workflows/ci-node.yml@v1
+    with:
+      install: false
+      scripts: ""
+      commands: node scripts/check-links.mjs

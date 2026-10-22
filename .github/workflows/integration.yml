@@ -1,0 +1,46 @@
+# Copyright (c) "Neo4j"
+# Neo4j Sweden AB [http://neo4j.com]
+#
+# Brings up each compose setup from the latest main of every repository and runs the checks that otherwise run by hand
+# (browser end-to-end, live, smoke, and the website's examples). Nightly, after any repository's release, or by hand.
+name: integration
+on:
+  schedule:
+    - cron: "37 2 * * *"
+  workflow_dispatch:
+  repository_dispatch:
+    types: [repo-released]
+concurrency:
+  group: integration
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  stack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    # the federation setup calls the live Wikipedia API: report its failures without failing the run
+    continue-on-error: ${{ matrix.setup == 'federation' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        setup: [default, agents, auth, federation]
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: work/grandstack }
+      - uses: actions/checkout@v4
+        with: { repository: "${{ github.repository_owner }}/grandstack-server", path: work/grandstack-server }
+      - uses: actions/checkout@v4
+        with: { repository: "${{ github.repository_owner }}/grandstack-web", path: work/grandstack-web }
+      - uses: actions/checkout@v4
+        with: { repository: "${{ github.repository_owner }}/grandstack-auth", path: work/grandstack-auth }
+      - uses: actions/checkout@v4
+        with: { repository: "${{ github.repository_owner }}/grandstack-agents", path: work/grandstack-agents }
+      - uses: actions/checkout@v4
+        with: { repository: "${{ github.repository_owner }}/grandstack-federation", path: work/grandstack-federation }
+      - uses: actions/checkout@v4
+        with: { repository: "${{ github.repository_owner }}/grand-stack.github.io", path: work/grand-stack.github.io }
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - name: ${{ matrix.setup }} setup
+        run: work/grandstack/scripts/integration.sh "${{ matrix.setup }}"
