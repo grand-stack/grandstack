@@ -2,6 +2,8 @@
 
 How the stack is wired and every setting that matters, with pointers to the repo that owns each one.
 
+> **Where to run this.** Docker Compose commands run inside a clone of this repository (`git clone https://github.com/grand-stack/grandstack`, then `cd grandstack`), with the repositories it builds cloned beside it. The [quickstart](../README.md#quickstart) has the exact steps.
+
 ## Compose services
 
 `compose.yaml` defines three services:

@@ -2,6 +2,8 @@
 
 For coding agents (Claude Code or any other) and the people directing them. It says what the system is, where to change what, how to verify, and what goes wrong. It is agent-agnostic; the worked example uses Claude Code.
 
+> **Where to run this.** Docker Compose commands run inside a clone of this repository (`git clone https://github.com/grand-stack/grandstack`, then `cd grandstack`), with the repositories it builds cloned beside it. The [quickstart](../README.md#quickstart) has the exact steps.
+
 ## Mental model in six lines
 
 1. Neo4j holds a graph. The GraphQL API is **generated** from `grandstack-server/schema/schema.graphql`; there are no resolvers to edit.
