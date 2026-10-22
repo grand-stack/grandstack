@@ -2,7 +2,7 @@
 
 How code is checked, how a release is made, and how every release reaches grandstack.ai. All of it runs as GitHub Actions in the `grand-stack` organisation. The shared pieces live in the organisation's `.github` repository (reusable workflows tagged `v1`); each repository has small workflow files that call them.
 
-> **Written but not yet run on GitHub.** The workflows were checked with `actionlint`, their scripts have unit tests, the integration script was run against all four compose setups, and the website job's steps were simulated locally. Nothing has run on GitHub yet, because the repositories are not pushed. Follow the [first-run checklist](#first-run-checklist) and expect to fix small things.
+> **Status.** These workflows have run on GitHub for the first time: CI is green in every repository, the website workflow checked out each repository at its tag, built, checked and deployed grandstack.ai, the nightly integration test passed for all four setups, and dry runs of the release and release-button workflows worked (the release dry run correctly refused a tag whose commit had no green CI run). **Not yet run for real:** a published release (GitHub Release, container images, the dispatch to the website), because that needs a real release and the `SITE_DISPATCH_TOKEN` secret. Follow the [first-run checklist](#first-run-checklist) for those.
 
 ## On every commit and pull request
 
