@@ -1,3 +1,5 @@
+# Copyright (c) "Neo4j"
+# Neo4j Sweden AB [http://neo4j.com]
 # Adds federation to the stack: the Neo4j server becomes a subgraph, a Wikipedia subgraph is added, and a gateway composes them.
 # Use together with compose.yaml:
 #   docker compose -f compose.yaml -f compose.federation.yaml up --build

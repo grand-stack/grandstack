@@ -1,3 +1,5 @@
+# Copyright (c) "Neo4j"
+# Neo4j Sweden AB [http://neo4j.com]
 # Adds the agents MCP server (streamable HTTP) to the default stack. Use together with compose.yaml:
 #   docker compose -f compose.yaml -f compose.agents.yaml up --build
 # It is read-only unless AGENTS_ALLOW_MUTATIONS=true. It talks to the open server, so there is no auth here.

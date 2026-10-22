@@ -1,3 +1,5 @@
+# Copyright (c) "Neo4j"
+# Neo4j Sweden AB [http://neo4j.com]
 # Adds authentication to the stack. Use together with compose.yaml:
 #   docker compose -f compose.yaml -f compose.auth.yaml up --build
 # DEVELOPMENT ONLY: Keycloak runs in dev mode with a demo realm, demo users and known passwords.
