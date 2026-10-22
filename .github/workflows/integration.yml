@@ -12,15 +12,13 @@ on:
     types: [repo-released]
 concurrency:
   group: integration
-  cancel-in-progress: true
+  cancel-in-progress: false
 permissions:
   contents: read
 jobs:
   stack:
     runs-on: ubuntu-latest
     timeout-minutes: 40
-    # the federation setup calls the live Wikipedia API: report its failures without failing the run
-    continue-on-error: ${{ matrix.setup == 'federation' }}
     strategy:
       fail-fast: false
       matrix:
@@ -43,4 +41,15 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 24 }
       - name: ${{ matrix.setup }} setup
-        run: work/grandstack/scripts/integration.sh "${{ matrix.setup }}"
+        id: checks
+        # the federation setup calls the live Wikipedia API: its failure is reported below without failing the run
+        continue-on-error: ${{ matrix.setup == 'federation' }}
+        env:
+          SETUP: ${{ matrix.setup }}
+        run: work/grandstack/scripts/integration.sh "$SETUP"
+      - name: Report a tolerated failure
+        if: ${{ steps.checks.outcome == 'failure' }}
+        run: |
+          echo "::warning::The ${{ matrix.setup }} checks failed (tolerated: they depend on a live external service). See the step above."
+          echo "### ${{ matrix.setup }} checks failed (tolerated)" >> "$GITHUB_STEP_SUMMARY"
+
