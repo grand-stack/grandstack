@@ -1,0 +1,13 @@
+# Adds the agents MCP server (streamable HTTP) to the default stack. Use together with compose.yaml:
+#   docker compose -f compose.yaml -f compose.agents.yaml up --build
+# It is read-only unless AGENTS_ALLOW_MUTATIONS=true. It talks to the open server, so there is no auth here.
+services:
+  agents-mcp:
+    build: ../grandstack-agents
+    environment:
+      GRAPHQL_URL: http://server:4000/graphql
+      ALLOW_MUTATIONS: ${AGENTS_ALLOW_MUTATIONS:-false}
+    ports:
+      - "4100:4100"
+    depends_on:
+      - server

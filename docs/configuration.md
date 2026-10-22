@@ -12,7 +12,7 @@ How the stack is wired and every setting that matters, with pointers to the repo
 | `server` | built from `../grandstack-server` | 4000:4000 | Needs Neo4j healthy first. |
 | `web` | built from `../grandstack-web` | 3000:8080 | Static files served by unprivileged nginx. |
 
-Because the builds use `../grandstack-server` and `../grandstack-web`, **the three repositories must sit side by side in one folder.** The auth setup also builds from `../grandstack-auth`, so that repository must be there too if you use it.
+Because the builds use `../grandstack-server` and `../grandstack-web`, **the three repositories must sit side by side in one folder.** The auth setup also builds from `../grandstack-auth`, and the agents setup from `../grandstack-agents`, so those repositories must be there too if you use them.
 
 ### With authentication: `compose.auth.yaml`
 
@@ -27,6 +27,16 @@ An override file, used together with `compose.yaml`: `docker compose -f compose.
 | `web` | unchanged: still http://localhost:3000, still calling `http://localhost:4000/graphql`, which is now the gateway, so it is an anonymous client |
 
 Ports in the auth setup: 3000 web, 3001 demo client, 4000 gateway, 8081 Keycloak, 7474 and 7687 Neo4j. Everything else about the auth settings (roles, permissions, rules, the issuer-versus-keys addresses) is documented in `grandstack-auth` (`docs/how-it-works.md`, `docs/role-and-scope-model.md`).
+
+### With agents: `compose.agents.yaml`
+
+An override file, used together with `compose.yaml`: `docker compose -f compose.yaml -f compose.agents.yaml up --build`. It adds one service:
+
+| Service | Detail |
+| --- | --- |
+| `agents-mcp` (new) | built from `../grandstack-agents`; MCP over streamable HTTP at `http://localhost:4100/mcp`; `GRAPHQL_URL=http://server:4000/graphql`; `ALLOW_MUTATIONS` from `AGENTS_ALLOW_MUTATIONS` (default `false`) |
+
+It talks to the open server, so it needs the default stack and has no auth of its own. Keep port 4100 on your machine. To use it with the auth setup, give it a token as described in `grandstack-agents` (`docs/adding-auth.md`).
 
 ## Settings you are likely to change
 
@@ -69,6 +79,7 @@ If you already run Neo4j (or anything else) on one of these ports, compose may f
 | --- | --- |
 | http://localhost:3000 | Web app |
 | http://localhost:4000/graphql | GraphQL API and GraphiQL |
+| http://localhost:4100/mcp | Agents MCP server (agents setup only; `/healthz` for a check) |
 | http://localhost:7474 | Neo4j Browser (user `neo4j`, password from `.env`) |
 | http://localhost:3001 | Auth demo client (auth setup only) |
 | http://localhost:8081 | Keycloak (auth setup only; admin console `admin` / `admin`) |

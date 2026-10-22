@@ -8,7 +8,7 @@ The bundled example is a movie and people app: faceted search with live counts, 
 
 ## Quickstart
 
-You need Docker or Podman with compose. Put the three repositories in one folder, side by side:
+You need Docker or Podman with compose. Put the repositories in one folder, side by side (the first three are enough for the default stack):
 
 ```
 grandstack-refresh/        any folder name
@@ -16,6 +16,7 @@ grandstack-refresh/        any folder name
   grandstack-server/       the GraphQL server
   grandstack-web/          the React app
   grandstack-auth/         optional: gateway, Keycloak realm, auth rules, demo client (only for the auth setup)
+  grandstack-agents/       optional: MCP server and agent examples (only for the agents setup)
 ```
 
 Then:
@@ -51,6 +52,17 @@ docker compose -f compose.yaml -f compose.auth.yaml up --build
 
 Reads stay public; writes need a login. See [`grandstack-auth`](docs/architecture.md#authentication-opt-in) and its docs for roles and rules. Stop it with `docker compose -f compose.yaml -f compose.auth.yaml down` (add `-v` to delete the data).
 
+## Run it with agents
+
+Add an MCP server that lets an agent run GraphQL against the (open) server:
+
+```sh
+docker compose -f compose.yaml -f compose.agents.yaml up --build
+claude mcp add --transport http grandstack http://localhost:4100/mcp
+```
+
+It is read-only by default; `AGENTS_ALLOW_MUTATIONS=true` enables writes. The endpoint has no auth: keep it on your machine. See [`grandstack-agents`](docs/architecture.md#agents-opt-in).
+
 ## Repositories
 
 | Repository | What it is | Start with |
@@ -59,6 +71,7 @@ Reads stay public; writes need a login. See [`grandstack-auth`](docs/architectur
 | `grandstack-server` | Docker image serving GraphQL over Neo4j from a schema file and env vars | its `README.md` and `docs/how-it-works.md` |
 | `grandstack-web` | React app with typed operations (open, no login) | its `README.md` and `docs/architecture.md` |
 | `grandstack-auth` | Gateway, Keycloak dev realm, auth schema rules, demo client, and the exercise for adding login to `grandstack-web` | its `README.md` and `docs/how-it-works.md` |
+| `grandstack-agents` | MCP server with generic GraphQL tools, a direct agent-loop example, and example code for using auth | its `README.md` and `docs/how-it-works.md` |
 
 ## Documentation
 
@@ -74,4 +87,4 @@ Reads stay public; writes need a login. See [`grandstack-auth`](docs/architectur
 
 The sample data has real titles, casts and relationships; ratings and runtimes are approximate.
 
-Last verified: grandstack v0.7.1 with grandstack-server v0.7.1, grandstack-web v0.5.1 and grandstack-auth v0.1.1, Neo4j 2026.10 community, under Podman 6 on macOS.
+Last verified: grandstack v0.8.0 with grandstack-server v0.7.1, grandstack-web v0.5.1, grandstack-auth v0.1.1 and grandstack-agents v0.1.0, Neo4j 2026.10 community, under Podman 6 on macOS.

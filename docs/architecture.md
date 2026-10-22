@@ -79,6 +79,24 @@ The default stack above is open. Adding `compose.auth.yaml` puts a gateway in fr
 - **`grandstack-web` is deliberately unchanged.** Through the gateway it is an anonymous client: reading works, writing is refused. Adding login to it is a documented exercise in `grandstack-auth`.
 - Details, roles, responses and what to change for production: the `grandstack-auth` repository's `docs/how-it-works.md`.
 
+## Agents (opt-in)
+
+`compose.agents.yaml` adds one service, `agents-mcp` on port 4100: an MCP server that accepts GraphQL statements and runs them against the server. An agent can also skip MCP and send GraphQL itself; both paths share one guarded executor.
+
+[![Two ways an agent can use the same GraphQL server: its own loop with a graphql tool, or any MCP client with the MCP server; both end in the same guarded executor and the open server.](diagrams/agents-direct-vs-mcp.svg)](diagrams/agents-direct-vs-mcp.svg)
+
+*Figure: the two agent paths. Click the image for full size; the numbered notes carry the same information as text.*
+
+1. **An agent you write** holds the model, the loop and one `graphql` tool.
+2. **Any MCP client** (Claude Code, Claude Desktop, your own app) lists and calls the tools.
+3. **The guarded executor** parses the statement, allows one operation, keeps queries and mutations apart, refuses mutations unless `ALLOW_MUTATIONS=true`, and applies a timeout and a size cap.
+4. **The server** is the open `grandstack-server`; nothing about it changes.
+5. **The MCP server** offers `get_schema`, `describe_type`, `run_query` and `run_mutation` over stdio or HTTP.
+
+- Read-only by default. That flag guards the MCP path only; the server on port 4000 stays open. Real control is auth: `grandstack-agents/docs/adding-auth.md` shows the same tools using `grandstack-auth` with a token.
+- The tools use introspection and know nothing about movies, so they work with another GraphQL server.
+- Details: the `grandstack-agents` repository's `docs/how-it-works.md`.
+
 ## Design decisions and why
 
 | Decision | Reason |

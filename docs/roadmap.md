@@ -2,21 +2,23 @@
 
 > **Not built yet.** Everything on this page is planned work. It describes intent, not a commitment, and none of it exists in the repositories today. For what exists, read the [architecture](architecture.md).
 
-The plan has five phases. Phases 1, 2 and 3 are done; the web app has since gained people pages and full create/edit/delete.
+The plan has six phases. Phases 1 to 4 are done; the web app has since gained people pages and full create/edit/delete.
 
 | Phase | Status | What |
 | --- | --- | --- |
 | 1. Server and umbrella skeleton | Done | GraphQL server image over Neo4j; compose with Neo4j and the server; Movies seed; lint and breaking-change checks; AGENTS.md. |
 | 2. Web app | Done | React client with typed operations; `docker compose up` gives Neo4j, server and web. Since extended with faceted search, compare, graph views, people, CRUD. |
 | 3. Auth | Done (Auth0 untested) | `grandstack-auth`: Hive Gateway validating Keycloak JWTs with permissions per mutation, row-level rules in the schema, `User` and `Review` types, a Keycloak dev realm and a demo client, opt-in through `compose.auth.yaml`. Auth0 is supported by configuration and documented, but not tested against a real tenant. `grandstack-web` is intentionally unchanged; adding login to it is a documented exercise. |
-| 4. Agents | Planned | MCP access to the GraphQL API (`@graphql-hive/plugin-mcp`), direct querying by agents, an attempt-memory graph in its own Neo4j database, guardrails for agents that write schemas. |
-| 5. Federation and site | Planned | REST APIs as subgraphs composed with the Neo4j subgraph (Mesh OpenAPI handler, Hive Gateway); a Hugo site with `llms.txt`, hoped for at grandstack.ai (availability unchecked). |
+| 4. Agents and GraphQL | Done (live Claude run untested) | `grandstack-agents`: a small MCP server (stdio and streamable HTTP) with generic tools that run any GraphQL statement, a direct agent-loop example, read-only by default, and documented example code for adding auth. It uses the open server. Optional through `compose.agents.yaml`. The Claude example needs an API key and was not run live by the authors. |
+| 5. Agent memory | Planned | Its own repo: an attempt-memory graph in a separate Neo4j (the community edition has one database per instance, so a second container), with auth introduced there. |
+| 6. Federation and site | Planned | REST APIs as subgraphs composed with the Neo4j subgraph (Mesh OpenAPI handler, Hive Gateway); a Hugo site with `llms.txt`, hoped for at grandstack.ai (availability unchecked). |
 
 ## What each phase will change in what you read here
 
 - **Phase 3 is done** as an opt-in setup. The default stack and `grandstack-web` are still open, so never expose them publicly; the auth setup is development-only too (see `grandstack-auth`'s docs for production gaps).
-- **Phase 4** will add an `agents` repository and an MCP endpoint; the schema descriptions the lint rule already requires are what an agent reads.
-- **Phase 5** will add subgraph repositories and publish these docs as a site.
+- **Phase 4 is done**: `grandstack-agents` adds an MCP endpoint and a direct-GraphQL example; the schema descriptions the lint rule already requires are what an agent reads. It is read-only by default but the server behind it is open; see its `docs/guardrails.md`.
+- **Phase 5** will add an agent-memory repository with its own Neo4j and auth.
+- **Phase 6** will add subgraph repositories and publish these docs as a site.
 
 ## Things to verify before relying on them
 
@@ -25,7 +27,7 @@ These are open questions from planning, not facts:
 - Whether `@neo4j/graphql` v7 supports Apollo Federation (its docs did not confirm).
 - Auth0: the settings are written in `grandstack-auth/docs/auth0.md` but never run against a tenant.
 - Whether the Mesh OpenAPI handler forwards auth headers and composes cleanly; it needs a prototype.
-- `@graphql-hive/plugin-mcp` is pre-1.0 and has no built-in auth, so security would rely on the gateway's JWT layer, which now exists (Phase 3).
+- `@graphql-hive/plugin-mcp` is pre-1.0 and has no built-in auth. Phase 4 did not use it: it uses a small custom MCP server with generic tools instead.
 - Hive Console (a self-hosted schema registry) is heavy (Postgres, ClickHouse, Redis, Redpanda, MinIO); it would be an optional compose profile.
 
 ## Also planned

@@ -7,5 +7,6 @@ Compose stack plus the overview docs for GRANDstack (GraphQL on Neo4j: `grandsta
 - Change the schema, seed or server behaviour in `grandstack-server`; change the UI in `grandstack-web`; follow each repo's `AGENTS.md` and `docs/recipes.md`.
 - Before you finish, run the checks for each repo you changed (listed in [docs/agents.md](docs/agents.md#verification-checklist)) and `node scripts/check-links.mjs` here.
 - The default stack has no authentication. The opt-in auth setup (`docker compose -f compose.yaml -f compose.auth.yaml up --build`, from the `grandstack-auth` repo) is development-only. Do not expose either publicly.
+- Agents: `docker compose -f compose.yaml -f compose.agents.yaml up --build` adds an MCP server at http://localhost:4100/mcp (from the `grandstack-agents` repo). It is read-only unless `AGENTS_ALLOW_MUTATIONS=true`, has no auth of its own, and talks to the open server. Keep it local.
 - Keep docs true: update the doc next to the behaviour you change, in the same change.
 - Diagrams: `docs/diagrams/*.svg` are hand-written SVG with numbered callouts, each embedded with a numbered text legend. When you change the behaviour a diagram shows, edit the SVG and its legend in the same change; `node scripts/check-links.mjs` fails if an image has no alt text, an SVG contains script or style, or the legend numbers differ from the callouts drawn.

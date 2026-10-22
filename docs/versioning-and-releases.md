@@ -11,7 +11,8 @@ Every repository uses **semantic versions as git tags** (`v0.6.0`). A change tha
 | `grandstack-server` | `v0.7.1` | v0.7.1: annotated diagrams (docs only). v0.7.0 added the generic auth settings (`AUTH_*`, `SCHEMA_EXTRA_PATHS`, `SETUP_CYPHER_PATHS`); earlier: `SEED_PROBE_LABEL`, `REFRESH_COUNTS`, schema reference generator, docs |
 | `grandstack-web` | `v0.5.1` | v0.5.1: annotated diagrams (docs only). v0.5.0: Docs, shared `hash` and `initials` helpers, browser end-to-end script |
 | `grandstack-auth` | `v0.1.1` | v0.1.1: annotated diagrams (docs only). v0.1.0: gateway, Keycloak dev realm, auth schema rules, demo client, smoke and browser tests, the exercise and its reference patch (made against `grandstack-web` v0.5.0) |
-| `grandstack` | `v0.7.1` | v0.7.1: annotated diagrams (docs only). v0.7.0: `compose.auth.yaml` (opt-in auth), docs |
+| `grandstack-agents` | `v0.1.0` | MCP server (stdio and streamable HTTP) with generic GraphQL tools, read-only by default; direct agent-loop example; auth example code; docs and diagrams; Dockerfile |
+| `grandstack` | `v0.8.0` | v0.8.0: `compose.agents.yaml` (opt-in agents MCP server), roadmap re-cut, docs. v0.7.1: annotated diagrams. v0.7.0: `compose.auth.yaml` (opt-in auth), docs |
 
 The versions that were tested together are the ones in this table. All tags are **local so far**: nothing is pushed or published, and no images are in a registry.
 

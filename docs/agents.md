@@ -41,6 +41,9 @@ docker compose up --build # web :3000, GraphQL :4000/graphql, Neo4j browser :747
 
 # with login (development only): gateway :4000, Keycloak :8081, auth demo client :3001
 docker compose -f compose.yaml -f compose.auth.yaml up --build
+
+# with an MCP server for agents: http://localhost:4100/mcp (read-only; AGENTS_ALLOW_MUTATIONS=true to write)
+docker compose -f compose.yaml -f compose.agents.yaml up --build
 ```
 
 Wait for the server log line `GraphQL ready at http://localhost:4000/graphql`. Use `docker compose down -v` to reset the data to the sample.
@@ -64,6 +67,9 @@ npm run e2e
 (cd gateway && npm ci && npm test && npm run typecheck)
 (cd client && npm ci && npm test && npm run typecheck)
 npm ci && npm run docs:check && npm run smoke && npm run e2e
+
+# grandstack-agents: tests and types need no stack; live needs the open stack, auth:check the auth stack
+npm ci && npm test && npm run typecheck && npm run docs:check && npm run live
 ```
 
 `schema:check` needs a git checkout with the schema committed at `HEAD` (commit the baseline before you edit). `docs:check` fails until you have run `npm run docs:schema` after a schema change; commit the regenerated reference.
@@ -86,7 +92,7 @@ curl -s localhost:4000/graphql -H 'content-type: application/json' \
   -d '{"query":"{ __schema { queryType { fields { name description } } mutationType { fields { name } } } }"}'
 ```
 
-Every type and field defined in the schema has a description (lint enforces it), and `grandstack-server/docs/schema-reference.md` lists them. The generated queries and mutations (`movies`, `createMovies`, ...) have no descriptions but follow a fixed naming pattern per type (see that repo's `docs/schema-guide.md`). Filters look like `movies(where: { rating: { gte: 8 }, genres: { some: { name: { in: ["Drama"] } } } })`; writes are covered in `grandstack-server/docs/mutations.md`. A planned MCP endpoint is on the [roadmap](roadmap.md); it does not exist yet.
+Every type and field defined in the schema has a description (lint enforces it), and `grandstack-server/docs/schema-reference.md` lists them. The generated queries and mutations (`movies`, `createMovies`, ...) have no descriptions but follow a fixed naming pattern per type (see that repo's `docs/schema-guide.md`). Filters look like `movies(where: { rating: { gte: 8 }, genres: { some: { name: { in: ["Drama"] } } } })`; writes are covered in `grandstack-server/docs/mutations.md`. An MCP server that runs GraphQL statements is available with `compose.agents.yaml` (port 4100, read-only by default); see `grandstack-agents` (`README.md`, `docs/direct-graphql.md`).
 
 ## Gotchas that cost time
 
@@ -111,7 +117,7 @@ Docs live next to the code they describe. When you change behaviour, update the 
 
 ## Example: asking Claude Code to make a change
 
-Open Claude Code in the folder that holds the three repositories, then give it a task and point it at the docs:
+Open Claude Code in the folder that holds the repositories, then give it a task and point it at the docs:
 
 > Add a `country` field to Movie and show it on the movie page. Follow `grandstack/docs/agents.md` and the recipes in each repo's `docs/recipes.md`. Run the checks before you say it is done.
 
