@@ -2,7 +2,7 @@
 
 > **Not built yet.** Everything on this page is planned work. It describes intent, not a commitment, and none of it exists in the repositories today. For what exists, read the [architecture](architecture.md).
 
-The plan has six phases. Phases 1 to 4 are done; the web app has since gained people pages and full create/edit/delete.
+The plan has seven phases. Phases 1 to 4 and 6 are done (phase 5, agent memory, was taken out of order); the web app has since gained people pages and full create/edit/delete.
 
 | Phase | Status | What |
 | --- | --- | --- |
@@ -11,22 +11,24 @@ The plan has six phases. Phases 1 to 4 are done; the web app has since gained pe
 | 3. Auth | Done (Auth0 untested) | `grandstack-auth`: Hive Gateway validating Keycloak JWTs with permissions per mutation, row-level rules in the schema, `User` and `Review` types, a Keycloak dev realm and a demo client, opt-in through `compose.auth.yaml`. Auth0 is supported by configuration and documented, but not tested against a real tenant. `grandstack-web` is intentionally unchanged; adding login to it is a documented exercise. |
 | 4. Agents and GraphQL | Done (live Claude run untested) | `grandstack-agents`: a small MCP server (stdio and streamable HTTP) with generic tools that run any GraphQL statement, a direct agent-loop example, read-only by default, and documented example code for adding auth. It uses the open server. Optional through `compose.agents.yaml`. The Claude example needs an API key and was not run live by the authors. |
 | 5. Agent memory | Planned | Its own repo: an attempt-memory graph in a separate Neo4j (the community edition has one database per instance, so a second container), with auth introduced there. |
-| 6. Federation and site | Planned | REST APIs as subgraphs composed with the Neo4j subgraph (Mesh OpenAPI handler, Hive Gateway); a Hugo site with `llms.txt`, hoped for at grandstack.ai (availability unchecked). |
+| 6. Federation | Done | `grandstack-federation`: the server as a federation subgraph (`FEDERATION=true`), a Wikipedia subgraph that adds a summary, image and link to films and people, composed by Mesh's compose CLI and served by Hive Gateway. Films and people are linked to Wikipedia pages by a committed, rule-checked links file (152 of 152 films, 461 of 464 people). Opt-in through `compose.federation.yaml`; needs internet. Mesh's OpenAPI handler was tried and not used (see that repo's `docs/prototype-findings.md`). Auth with federation is not built. |
+| 7. Site | Planned | A Hugo site with `llms.txt`, hoped for at grandstack.ai (availability unchecked). |
 
 ## What each phase will change in what you read here
 
 - **Phase 3 is done** as an opt-in setup. The default stack and `grandstack-web` are still open, so never expose them publicly; the auth setup is development-only too (see `grandstack-auth`'s docs for production gaps).
 - **Phase 4 is done**: `grandstack-agents` adds an MCP endpoint and a direct-GraphQL example; the schema descriptions the lint rule already requires are what an agent reads. It is read-only by default but the server behind it is open; see its `docs/guardrails.md`.
 - **Phase 5** will add an agent-memory repository with its own Neo4j and auth.
-- **Phase 6** will add subgraph repositories and publish these docs as a site.
+- **Phase 6 is done**: `grandstack-federation` adds a gateway on port 4000, with the server moving to port 4001 in that setup.
+- **Phase 7** will publish these docs as a site.
 
 ## Things to verify before relying on them
 
 These are open questions from planning, not facts:
 
-- Whether `@neo4j/graphql` v7 supports Apollo Federation (its docs did not confirm).
+- Federation: `@neo4j/graphql` v7 does support it (Phase 6), but only `@key` and federation v2.0 were exercised, and `@apollo/subgraph` must be pinned to 2.14.4.
 - Auth0: the settings are written in `grandstack-auth/docs/auth0.md` but never run against a tenant.
-- Whether the Mesh OpenAPI handler forwards auth headers and composes cleanly; it needs a prototype.
+- Mesh OpenAPI handler: tried in Phase 6. It composed and worked for linked entities, but mishandled an entity with a null key, so the Wikipedia subgraph is hand-written. Forwarding auth headers through it was not tested.
 - `@graphql-hive/plugin-mcp` is pre-1.0 and has no built-in auth. Phase 4 did not use it: it uses a small custom MCP server with generic tools instead.
 - Hive Console (a self-hosted schema registry) is heavy (Postgres, ClickHouse, Redis, Redpanda, MinIO); it would be an optional compose profile.
 

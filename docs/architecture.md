@@ -97,6 +97,26 @@ The default stack above is open. Adding `compose.auth.yaml` puts a gateway in fr
 - The tools use introspection and know nothing about movies, so they work with another GraphQL server.
 - Details: the `grandstack-agents` repository's `docs/how-it-works.md`.
 
+## Federation (opt-in)
+
+`compose.federation.yaml` turns the server into a federation subgraph, adds a Wikipedia subgraph, and puts a gateway on port 4000 that serves one combined API. The Neo4j subgraph moves to port 4001.
+
+[![The federation setup: clients call a gateway on port 4000; it uses a composed supergraph and sends parts of each query to the Neo4j subgraph and to a Wikipedia subgraph, which calls the public Wikipedia API; a generated links file gives films and people their Wikipedia page.](diagrams/federation-overview.svg)](diagrams/federation-overview.svg)
+
+*Figure: the federation setup. Click the image for full size; the numbered notes carry the same information as text.*
+
+1. **Clients** (`grandstack-web`, agents, curl) call one endpoint.
+2. **The gateway** (Hive Gateway) reads the supergraph and plans each query.
+3. **The supergraph** is composed from the two subgraphs by `npm run compose` and committed.
+4. **The Neo4j subgraph** is `grandstack-server` with `FEDERATION=true`; Movie and Person are keyed on `wikipediaTitle`.
+5. **The Wikipedia subgraph** adds `wikipedia` (description, extract, image, page link) to Movie and Person.
+6. **The links file** gives films and people their Wikipedia page, set at server start.
+
+- The Wikipedia part calls the live public Wikipedia API: it needs internet, is cached for an hour, and its text is CC BY-SA 4.0.
+- A film or person with no link returns `wikipedia: null` with no error; Wikipedia trouble returns `null` with an error and the Neo4j fields still arrive.
+- Open, like the default stack: combining it with auth is not built.
+- Details: the `grandstack-federation` repository's `docs/how-it-works.md`.
+
 ## Design decisions and why
 
 | Decision | Reason |

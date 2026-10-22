@@ -17,6 +17,7 @@ grandstack-refresh/        any folder name
   grandstack-web/          the React app
   grandstack-auth/         optional: gateway, Keycloak realm, auth rules, demo client (only for the auth setup)
   grandstack-agents/       optional: MCP server and agent examples (only for the agents setup)
+  grandstack-federation/   optional: Wikipedia subgraph, gateway, link builder (only for the federation setup)
 ```
 
 Then:
@@ -63,6 +64,16 @@ claude mcp add --transport http grandstack http://localhost:4100/mcp
 
 It is read-only by default; `AGENTS_ALLOW_MUTATIONS=true` enables writes. The endpoint has no auth: keep it on your machine. See [`grandstack-agents`](docs/architecture.md#agents-opt-in).
 
+## Run it with federation
+
+Add a Wikipedia subgraph and a gateway, so one query returns movie data from Neo4j together with a Wikipedia summary:
+
+```sh
+docker compose -f compose.yaml -f compose.federation.yaml up --build
+```
+
+Needs internet (the Wikipedia part is live). The gateway is then on port 4000 (the web app uses it unchanged) and the Neo4j subgraph on 4001. See [`grandstack-federation`](docs/architecture.md#federation-opt-in). It replaces the default, auth and agents setups on port 4000; run one at a time.
+
 ## Repositories
 
 | Repository | What it is | Start with |
@@ -72,6 +83,7 @@ It is read-only by default; `AGENTS_ALLOW_MUTATIONS=true` enables writes. The en
 | `grandstack-web` | React app with typed operations (open, no login) | its `README.md` and `docs/architecture.md` |
 | `grandstack-auth` | Gateway, Keycloak dev realm, auth schema rules, demo client, and the exercise for adding login to `grandstack-web` | its `README.md` and `docs/how-it-works.md` |
 | `grandstack-agents` | MCP server with generic GraphQL tools, a direct agent-loop example, and example code for using auth | its `README.md` and `docs/how-it-works.md` |
+| `grandstack-federation` | Wikipedia subgraph, gateway and supergraph, link builder; the server becomes a subgraph | its `README.md` and `docs/how-it-works.md` |
 
 ## Documentation
 
@@ -87,4 +99,4 @@ It is read-only by default; `AGENTS_ALLOW_MUTATIONS=true` enables writes. The en
 
 The sample data has real titles, casts and relationships; ratings and runtimes are approximate.
 
-Last verified: grandstack v0.8.2 with grandstack-server v0.7.1, grandstack-web v0.5.1, grandstack-auth v0.1.1 and grandstack-agents v0.1.2, Neo4j 2026.10 community, under Podman 6 on macOS.
+Last verified: grandstack v0.9.0 with grandstack-server v0.9.0, grandstack-web v0.5.1, grandstack-auth v0.1.1, grandstack-agents v0.1.2 and grandstack-federation v0.1.0, Neo4j 2026.10 community, under Podman 6 on macOS.

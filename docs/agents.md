@@ -42,6 +42,9 @@ docker compose up --build # web :3000, GraphQL :4000/graphql, Neo4j browser :747
 # with login (development only): gateway :4000, Keycloak :8081, auth demo client :3001
 docker compose -f compose.yaml -f compose.auth.yaml up --build
 
+# with federation (Wikipedia summaries on films and people; needs internet): gateway :4000, subgraphs :4001 and :4010
+docker compose -f compose.yaml -f compose.federation.yaml up --build
+
 # with an MCP server for agents: http://localhost:4100/mcp (read-only; AGENTS_ALLOW_MUTATIONS=true to write)
 docker compose -f compose.yaml -f compose.agents.yaml up --build
 ```
@@ -70,6 +73,9 @@ npm ci && npm run docs:check && npm run smoke && npm run e2e
 
 # grandstack-agents: tests and types need no stack; live needs the open stack, auth:check the auth stack
 npm ci && npm test && npm run typecheck && npm run docs:check && npm run live
+
+# grandstack-federation: tests and types need no stack; smoke needs the federation stack and internet
+npm ci && npm test && npm run typecheck && npm run docs:check && npm run smoke
 ```
 
 `schema:check` needs a git checkout with the schema committed at `HEAD` (commit the baseline before you edit). `docs:check` fails until you have run `npm run docs:schema` after a schema change; commit the regenerated reference.

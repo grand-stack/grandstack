@@ -1,0 +1,39 @@
+# Adds federation to the stack: the Neo4j server becomes a subgraph, a Wikipedia subgraph is added, and a gateway composes them.
+# Use together with compose.yaml:
+#   docker compose -f compose.yaml -f compose.federation.yaml up --build
+# The Wikipedia part calls the public Wikipedia API, so this setup needs internet access. Open stack: no auth.
+services:
+  server:
+    environment:
+      FEDERATION: "true"
+      SCHEMA_EXTRA_PATHS: /app/schema/federation.graphql
+      SETUP_CYPHER_PATHS: /app/seed/wikipedia-links.cypher
+    volumes:
+      - ../grandstack-federation/schema/federation.graphql:/app/schema/federation.graphql:ro
+      - ../grandstack-federation/seed/wikipedia-links.cypher:/app/seed/wikipedia-links.cypher:ro
+    # The gateway takes port 4000. The subgraph stays reachable on 4001 for development and for `npm run compose`.
+    ports: !override
+      - "4001:4000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4000/graphql?query=%7B__typename%7D').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 10s
+
+  wikipedia:
+    build: ../grandstack-federation
+    ports:
+      - "4010:4010"
+
+  gateway:
+    build: ../grandstack-federation/gateway
+    environment:
+      CORS_ORIGIN: http://localhost:3000
+    ports:
+      - "4000:4000"
+    depends_on:
+      server:
+        condition: service_healthy
+      wikipedia:
+        condition: service_healthy
