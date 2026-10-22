@@ -99,4 +99,4 @@ Needs internet (the Wikipedia part is live). The gateway is then on port 4000 (t
 
 The sample data has real titles, casts and relationships; ratings and runtimes are approximate.
 
-Last verified: grandstack v0.9.0 with grandstack-server v0.9.0, grandstack-web v0.5.1, grandstack-auth v0.1.1, grandstack-agents v0.1.2 and grandstack-federation v0.1.0, Neo4j 2026.10 community, under Podman 6 on macOS.
+Last verified: grandstack v0.9.1 with grandstack-server v0.9.0, grandstack-web v0.5.1, grandstack-auth v0.1.1, grandstack-agents v0.1.2 and grandstack-federation v0.1.1, Neo4j 2026.10 community, under Podman 6 on macOS.
