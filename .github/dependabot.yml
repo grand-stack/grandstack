@@ -10,3 +10,6 @@ updates:
     groups:
       actions:
         patterns: ["*"]
+  - package-ecosystem: docker-compose
+    directory: "/"
+    schedule: { interval: weekly }
