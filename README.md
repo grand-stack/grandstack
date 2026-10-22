@@ -95,8 +95,12 @@ Needs internet (the Wikipedia part is live). The gateway is then on port 4000 (t
 | [Configuration](docs/configuration.md) | Services, ports, settings (including the auth setup), Podman, resetting data |
 | [Versioning and releases](docs/versioning-and-releases.md) | Tags, what is released, how to cut a release |
 | [Roadmap](docs/roadmap.md) | Planned work (not built yet) |
-| [llms.txt](llms.txt) | An index of all of this for agents |
+| [llms.txt](llms.txt) | An index of all of this for agents (the public copy is https://grandstack.ai/llms.txt) |
 
 The sample data has real titles, casts and relationships; ratings and runtimes are approximate.
 
 Last verified: grandstack v0.9.1 with grandstack-server v0.9.0, grandstack-web v0.5.1, grandstack-auth v0.1.1, grandstack-agents v0.1.2 and grandstack-federation v0.1.1, Neo4j 2026.10 community, under Podman 6 on macOS.
+
+## Licence
+
+Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE). The same licence applies to every GRANDstack repository and to [grandstack.ai](https://grandstack.ai).

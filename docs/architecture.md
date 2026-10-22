@@ -2,7 +2,7 @@
 
 GRANDstack is a way to build apps on a Neo4j graph with GraphQL: a Neo4j database, a GraphQL server generated from a schema file, and a React client with typed operations. The **A** now stands for **Agent**: the same GraphQL API that serves the web app is meant to serve coding agents and agentic apps too. Apollo has been removed; the pieces are Neo4j's GraphQL library, GraphQL Yoga and open-source libraries that run locally in Docker.
 
-This guide describes what is built today (versions: grandstack-server v0.7.1, grandstack-web v0.5.1, grandstack-auth v0.1.1, grandstack v0.7.1). What is planned is on the [roadmap](roadmap.md).
+This guide describes what is built today (the versions that were tested together are in [versioning and releases](versioning-and-releases.md)). What is planned is on the [roadmap](roadmap.md).
 
 ## Components
 

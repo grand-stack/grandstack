@@ -2,7 +2,7 @@
 
 > **Not built yet.** Everything on this page is planned work. It describes intent, not a commitment, and none of it exists in the repositories today. For what exists, read the [architecture](architecture.md).
 
-The plan has seven phases. Phases 1 to 4 and 6 are done (phase 5, agent memory, was taken out of order); the web app has since gained people pages and full create/edit/delete.
+The plan has seven phases. Phases 1 to 4, 6 and 7 are done (phase 5, agent memory, was taken out of order); the web app has since gained people pages and full create/edit/delete.
 
 | Phase | Status | What |
 | --- | --- | --- |
@@ -12,7 +12,7 @@ The plan has seven phases. Phases 1 to 4 and 6 are done (phase 5, agent memory, 
 | 4. Agents and GraphQL | Done (live Claude run untested) | `grandstack-agents`: a small MCP server (stdio and streamable HTTP) with generic tools that run any GraphQL statement, a direct agent-loop example, read-only by default, and documented example code for adding auth. It uses the open server. Optional through `compose.agents.yaml`. The Claude example needs an API key and was not run live by the authors. |
 | 5. Agent memory | Planned | Its own repo: an attempt-memory graph in a separate Neo4j (the community edition has one database per instance, so a second container), with auth introduced there. |
 | 6. Federation | Done | `grandstack-federation`: the server as a federation subgraph (`FEDERATION=true`), a Wikipedia subgraph that adds a summary, image and link to films and people, composed by Mesh's compose CLI and served by Hive Gateway. Films and people are linked to Wikipedia pages by a committed, rule-checked links file (152 of 152 films, 461 of 464 people). Opt-in through `compose.federation.yaml`; needs internet. Mesh's OpenAPI handler was tried and not used (see that repo's `docs/prototype-findings.md`). Auth with federation is not built. |
-| 7. Site | Planned | A Hugo site with `llms.txt`, hoped for at grandstack.ai (availability unchecked). |
+| 7. Site | Done (deployment not verified here) | https://grandstack.ai, a Hugo site in its own repo (`grand-stack.github.io`) with a hand-written theme: home, quickstart, the docs of every repo (a generated copy), examples that are run against real stacks, this roadmap, a page for agents, and `llms.txt` and `llms-full.txt`. Built for GitHub Pages; the DNS and Pages settings are the maintainers'. Every repository is Apache-2.0 (LICENSE and NOTICE in each). |
 
 ## What each phase will change in what you read here
 
@@ -20,7 +20,7 @@ The plan has seven phases. Phases 1 to 4 and 6 are done (phase 5, agent memory, 
 - **Phase 4 is done**: `grandstack-agents` adds an MCP endpoint and a direct-GraphQL example; the schema descriptions the lint rule already requires are what an agent reads. It is read-only by default but the server behind it is open; see its `docs/guardrails.md`.
 - **Phase 5** will add an agent-memory repository with its own Neo4j and auth.
 - **Phase 6 is done**: `grandstack-federation` adds a gateway on port 4000, with the server moving to port 4001 in that setup.
-- **Phase 7** will publish these docs as a site.
+- **Phase 7 is done**: the docs are published as https://grandstack.ai (built from the repos by a sync script), and `llms.txt` there is the public index.
 
 ## Things to verify before relying on them
 
@@ -34,4 +34,4 @@ These are open questions from planning, not facts:
 
 ## Also planned
 
-Publish the repositories to a GitHub organisation (they are private and local until then), publish versioned images, pin them in compose, and add link targets between repositories in these docs once the URLs exist.
+Publish the repositories to the GitHub organisation https://github.com/grand-stack (nothing is pushed yet), publish versioned images, pin them in compose, and add link targets between repositories in these docs once the URLs exist.
