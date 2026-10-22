@@ -92,7 +92,7 @@ curl -s localhost:4000/graphql -H 'content-type: application/json' \
   -d '{"query":"{ __schema { queryType { fields { name description } } mutationType { fields { name } } } }"}'
 ```
 
-Every type and field defined in the schema has a description (lint enforces it), and `grandstack-server/docs/schema-reference.md` lists them. The generated queries and mutations (`movies`, `createMovies`, ...) have no descriptions but follow a fixed naming pattern per type (see that repo's `docs/schema-guide.md`). Filters look like `movies(where: { rating: { gte: 8 }, genres: { some: { name: { in: ["Drama"] } } } })`; writes are covered in `grandstack-server/docs/mutations.md`. An MCP server that runs GraphQL statements is available with `compose.agents.yaml` (port 4100, read-only by default); see `grandstack-agents` (`README.md`, `docs/direct-graphql.md`).
+Every type and field defined in the schema has a description (lint enforces it), and `grandstack-server/docs/schema-reference.md` lists them. The generated queries and mutations (`movies`, `createMovies`, ...) have no descriptions but follow a fixed naming pattern per type (see that repo's `docs/schema-guide.md`). Filters look like `movies(where: { rating: { gte: 8 }, genres: { some: { name: { in: ["Drama"] } } } })`; writes are covered in `grandstack-server/docs/mutations.md`. An MCP server that runs GraphQL statements is available with `compose.agents.yaml` (port 4100, read-only by default); see `grandstack-agents` (`README.md`, `docs/direct-graphql.md`). How well an agent does depends on how the type definitions are written; see `grandstack-agents` `docs/schema-design-for-agents.md`.
 
 ## Gotchas that cost time
 

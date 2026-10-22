@@ -87,4 +87,4 @@ It is read-only by default; `AGENTS_ALLOW_MUTATIONS=true` enables writes. The en
 
 The sample data has real titles, casts and relationships; ratings and runtimes are approximate.
 
-Last verified: grandstack v0.8.0 with grandstack-server v0.7.1, grandstack-web v0.5.1, grandstack-auth v0.1.1 and grandstack-agents v0.1.0, Neo4j 2026.10 community, under Podman 6 on macOS.
+Last verified: grandstack v0.8.1 with grandstack-server v0.7.1, grandstack-web v0.5.1, grandstack-auth v0.1.1 and grandstack-agents v0.1.1, Neo4j 2026.10 community, under Podman 6 on macOS.
