@@ -1,0 +1,43 @@
+# Copyright (c) "Neo4j"
+# Neo4j Sweden AB [http://neo4j.com]
+# Puts TLS, a sign-in, rate limits and security headers in front of the Aura setup, and stops everything else being published. This is
+# the way to serve other devices (a phone on the same network). Read grandstack-web-aura/docs/deploying.md first.
+#   (cd ../grandstack-web-aura && scripts/init-env.sh --edge)            # a certificate and the sign-in; prints the password once
+#   docker compose -f compose.yaml -f compose.aura.yaml -f compose.aura-edge.yaml up --build     # https://localhost:8443
+# To compose the supergraph or run the tests you need the subgraph ports, so use compose.aura.yaml without this file for that.
+services:
+  neo4j:
+    ports: !reset []
+  server:
+    ports: !reset []
+  aura:
+    ports: !reset []
+  mock-aura:
+    ports: !reset []
+  gateway:
+    ports: !reset []
+  web:
+    ports: !reset []
+
+  edge:
+    build: ../grandstack-web-aura/edge
+    environment:
+      EDGE_REQUEST_RATE: ${EDGE_REQUEST_RATE:-20r/s}
+      EDGE_MUTATION_RATE: ${EDGE_MUTATION_RATE:-60r/m}
+      # Set to e.g. "max-age=31536000" once this has a real hostname with a real certificate. It applies to the whole host.
+      EDGE_HSTS: ${EDGE_HSTS:-}
+    volumes:
+      - ../grandstack-web-aura/edge/secrets/htpasswd:/etc/nginx/secrets/htpasswd:ro
+      - ../grandstack-web-aura/edge/secrets/tls.crt:/etc/nginx/secrets/tls.crt:ro
+      - ../grandstack-web-aura/edge/secrets/tls.key:/etc/nginx/secrets/tls.key:ro
+    ports:
+      # This machine only by default. To serve other machines set EDGE_BIND=0.0.0.0, and read the deploying guide first.
+      - "${EDGE_BIND:-127.0.0.1}:${EDGE_PORT:-8443}:8443"
+    healthcheck:
+      test: ["CMD", "wget", "--no-check-certificate", "-q", "-O", "/dev/null", "https://localhost:8443/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    depends_on:
+      - web
+      - gateway

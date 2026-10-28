@@ -1,0 +1,149 @@
+# Copyright (c) "Neo4j"
+# Neo4j Sweden AB [http://neo4j.com]
+# Replaces the Movies app with a web UI for managing Neo4j Aura (from the grandstack-web-aura repository): the same server image serves
+# the Aura graph model instead of Movies, an Aura subgraph syncs Aura's state into it and applies reviewed changes, and the federation
+# gateway composes the two. Use together with compose.yaml:
+#   echo "SECRET_KEY=$(openssl rand -base64 32)" >> .env        # once; seals the Aura client secret. Keep it.
+#   docker compose -f compose.yaml -f compose.aura.yaml up --build
+# It points at a fake Aura (mock-aura) unless AURA_BASE_URL is set, so no real account is touched by default. It replaces the other
+# setups on ports 3000 and 4000, and uses its own Neo4j volume, so the Movies data and the Aura data never mix. Open, no sign-in:
+# everything is published on this machine only. For TLS and a sign-in, add compose.aura-edge.yaml.
+services:
+  neo4j:
+    # Its own volume, and published on this machine only
+    volumes: !override
+      - neo4j-aura-data:/data
+    ports: !override
+      - "127.0.0.1:7474:7474"
+      - "127.0.0.1:7687:7687"
+    networks:
+      - default
+      - store
+
+  # The read-only server: the Aura model with no mutations, as a federation subgraph. The gateway and the web app read through it.
+  server:
+    environment:
+      MODEL: aura
+      MODELS_DIR: /app/models
+      READ_ONLY: "true"
+      FEDERATION: "true"
+    volumes:
+      - ../grandstack-web-aura/models:/app/models:ro
+    # The gateway takes port 4000. The subgraph stays reachable on 4001 for development and for `npm run compose:supergraph`.
+    ports: !override
+      - "127.0.0.1:4001:4000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4000/graphql?query=%7B__typename%7D').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 10s
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      # One at a time: both run the model's setup Cypher at start, and two servers creating the same constraint together can collide
+      store-writer:
+        condition: service_healthy
+
+  # The same image and model, writable, for the Aura subgraph only. Nothing else can reach it: it is on a private network with
+  # Neo4j and the Aura subgraph, it publishes no port, and the gateway does not route to it. It has no sign-in of its own.
+  store-writer:
+    build: ../grandstack-server
+    environment:
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USERNAME: neo4j
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-grandstack-dev}
+      MODEL: aura
+      MODELS_DIR: /app/models
+      FEDERATION: "true"
+    volumes:
+      - ../grandstack-web-aura/models:/app/models:ro
+    networks:
+      - store
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4000/graphql?query=%7B__typename%7D').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 10s
+    depends_on:
+      neo4j:
+        condition: service_healthy
+
+  # The Aura subgraph: syncs Aura into the store, plans and confirms changes, keeps the sealed secrets.
+  aura:
+    build:
+      context: ../grandstack-web-aura
+      dockerfile: aura/Dockerfile
+    environment:
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USERNAME: neo4j
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-grandstack-dev}
+      STORE_WRITER_URL: http://store-writer:4000/graphql
+      SECRET_KEY: "${SECRET_KEY:?Set SECRET_KEY in .env first, as described at the top of compose.aura.yaml}"
+      # The fake Aura by default. For a real account set AURA_BASE_URL=https://api.neo4j.io (ALLOW_INSECURE_AURA_URL then has no effect).
+      AURA_BASE_URL: ${AURA_BASE_URL:-http://mock-aura:4020}
+      ALLOW_INSECURE_AURA_URL: ${ALLOW_INSECURE_AURA_URL:-true}
+      SYNC_INTERVAL_MS: ${SYNC_INTERVAL_MS:-900000}
+    ports:
+      - "127.0.0.1:4010:4010"
+    networks:
+      - default
+      - store
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4010/graphql?query=%7B__typename%7D').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 10s
+    depends_on:
+      store-writer:
+        condition: service_healthy
+      mock-aura:
+        condition: service_started
+
+  # A fake of the Aura API, checked against Aura's own OpenAPI file. Credentials: mock-client / mock-secret.
+  mock-aura:
+    build:
+      context: ../grandstack-web-aura
+      dockerfile: mock-aura/Dockerfile
+    environment:
+      MOCK_STEP_MS: ${MOCK_STEP_MS:-3000}
+    ports:
+      - "127.0.0.1:4020:4020"
+
+  # The federation gateway image from grandstack-federation, with this setup's own supergraph and gateway config mounted over its own.
+  gateway:
+    build: ../grandstack-federation/gateway
+    environment:
+      CORS_ORIGIN: http://localhost:3000
+    volumes:
+      - ../grandstack-web-aura/gateway/supergraph.graphql:/gateway/supergraph.graphql:ro
+      - ../grandstack-web-aura/gateway/gateway.config.ts:/gateway/gateway.config.ts:ro
+    ports:
+      - "127.0.0.1:4000:4000"
+    depends_on:
+      server:
+        condition: service_healthy
+      aura:
+        condition: service_healthy
+
+  # The Aura web app, in place of the Movies one. It is its own web server: it serves the app and forwards /graphql to the gateway, so
+  # the browser talks to one origin (its content security policy allows nothing else). Empty means "this origin".
+  web:
+    build:
+      context: ../grandstack-web-aura
+      dockerfile: web/Dockerfile
+      args: !override
+        VITE_GRAPHQL_URL: ""
+    ports: !override
+      - "127.0.0.1:3000:8080"
+    depends_on: !override
+      - gateway
+
+networks:
+  # Neo4j, the writable server and the Aura subgraph. The gateway and the web app are not on it.
+  store: {}
+
+volumes:
+  neo4j-aura-data:

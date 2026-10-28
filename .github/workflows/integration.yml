@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        setup: [default, agents, auth, federation]
+        setup: [default, agents, auth, federation, aura]
     steps:
       - uses: actions/checkout@v4
         with: { path: work/grandstack }
@@ -36,6 +36,8 @@ jobs:
         with: { repository: "${{ github.repository_owner }}/grandstack-agents", path: work/grandstack-agents }
       - uses: actions/checkout@v4
         with: { repository: "${{ github.repository_owner }}/grandstack-federation", path: work/grandstack-federation }
+      - uses: actions/checkout@v4
+        with: { repository: "${{ github.repository_owner }}/grandstack-web-aura", path: work/grandstack-web-aura }
       - uses: actions/checkout@v4
         with: { repository: "${{ github.repository_owner }}/grand-stack.github.io", path: work/grand-stack.github.io }
       - uses: actions/setup-node@v4
