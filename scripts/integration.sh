@@ -3,13 +3,13 @@
 # Neo4j Sweden AB [http://neo4j.com]
 #
 # Brings up one compose setup from the sibling repositories and runs that setup's checks against it, then tears it down.
-#   scripts/integration.sh default|agents|auth|federation
+#   scripts/integration.sh default|agents|auth|federation|aura
 # The repositories must sit side by side (this one beside grandstack-server, grandstack-web, grandstack-auth, grandstack-agents,
-# grandstack-federation and grand-stack.github.io). CI checks them out that way; locally, set DOCKER_HOST first if docker is Podman.
+# grandstack-federation, grandstack-web-aura and grand-stack.github.io). CI checks them out that way; locally, set DOCKER_HOST first if docker is Podman.
 # The federation checks call the live Wikipedia API. Set CHROME_PATH if Chrome is not on the PATH.
 set -eu
 
-setup="${1:?usage: scripts/integration.sh default|agents|auth|federation}"
+setup="${1:?usage: scripts/integration.sh default|agents|auth|federation|aura}"
 here="$(cd "$(dirname "$0")/.." && pwd)"
 ws="$(dirname "$here")"
 cd "$here"
@@ -22,6 +22,7 @@ case "$setup" in
   agents)     files="-f compose.yaml -f compose.agents.yaml" ;;
   auth)       files="-f compose.yaml -f compose.auth.yaml" ;;
   federation) files="-f compose.yaml -f compose.federation.yaml" ;;
+  aura)       files="-f compose.yaml -f compose.aura.yaml -f compose.aura-mock.yaml" ;;
   *) echo "unknown setup: $setup" >&2; exit 2 ;;
 esac
 if [ -z "${CHROME_PATH:-}" ]; then
@@ -30,6 +31,9 @@ fi
 export CHROME_PATH
 # the browser checks use fixed pauses; stretch them on CI runners, which are slower than a laptop
 if [ -n "${CI:-}" ]; then export SETTLE_SCALE="${SETTLE_SCALE:-3}"; fi
+
+# the Aura setup seals the Aura client secret with a key; a throwaway one is enough for a test run
+if [ "$setup" = aura ]; then export SECRET_KEY="${SECRET_KEY:-$(openssl rand -base64 32)}"; fi
 
 # shellcheck disable=SC2086
 compose() { docker compose $files "$@"; }
@@ -73,5 +77,9 @@ case "$setup" in
     wait_for http://localhost:4010/healthz "the Wikipedia subgraph" 120
     step "federation smoke"; (cd "$ws/grandstack-federation" && npm ci && npm run smoke)
     examples ;;
+  aura)
+    wait_for http://localhost:3000/ "the web app" 120
+    # the browser checks run against the fake Aura (compose.aura-mock.yaml, mock-aura published on loopback), never the real one; the website has no examples for this setup
+    step "aura browser checks"; (cd "$ws/grandstack-web-aura" && npm ci && BASE_URL=http://localhost:3000 npm run e2e -w web) ;;
 esac
 step "all checks passed"

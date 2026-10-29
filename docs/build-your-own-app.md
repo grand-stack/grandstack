@@ -282,6 +282,9 @@ You should see six book cards with generated posters, authors with their roles a
 
 ## Where to go next
 
+If you are turning this into a separate repository or a new setup of your own, read [building on GRANDstack](building-on-grandstack.md) first: it says how to build on the server, gateway and compose files instead of copying them.
+
+
 Use the web repo's `docs/recipes.md` for the patterns, adapted to your entities:
 
 - **Filters in the URL:** copy the idea of `src/lib/filters.ts` (parse, serialize, `buildWhere`) in the original repo for your own fields.

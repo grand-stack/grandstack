@@ -17,6 +17,10 @@ For coding agents (Claude Code or any other) and the people directing them. It s
 
 `npm ci` prints `npm warn install-scripts ... approve` warnings; they are harmless. The package versions in `package.json` match the git tags.
 
+## Adding a repository or a setup: build on the blocks
+
+GRANDstack exists to give people building blocks to shape into their own solution. Before you create a repository, a compose file, a server, a gateway or a docs structure, read [building on GRANDstack](building-on-grandstack.md): use the `grandstack-server` image (with a model, or its schema and setup settings), the `grandstack-federation` gateway image (with your own config files), `grandstack-auth` and `grandstack-agents`, and put the compose file in this repository as an overlay. If a block falls short, improve the block (generically, on a branch, with tests and docs) instead of copying it. Only what is genuinely new belongs in the new repository. The page has a checklist and the warning signs of a silo.
+
 ## Where to change what
 
 | You want to... | Change | Then run |
@@ -46,6 +50,9 @@ docker compose -f compose.yaml -f compose.auth.yaml up --build
 
 # with federation (Wikipedia summaries on films and people; needs internet): gateway :4000, subgraphs :4001 and :4010
 docker compose -f compose.yaml -f compose.federation.yaml up --build
+
+# with Aura management (a web UI for Aura, against the real Aura; add -f compose.aura-mock.yaml for a fake one; needs SECRET_KEY in .env): app :3000, gateway :4000
+docker compose -f compose.yaml -f compose.aura.yaml up --build
 
 # with an MCP server for agents: http://localhost:4100/mcp (read-only; AGENTS_ALLOW_MUTATIONS=true to write)
 docker compose -f compose.yaml -f compose.agents.yaml up --build

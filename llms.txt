@@ -2,7 +2,7 @@
 
 > GraphQL on Neo4j for developers and agents. A Neo4j database, a GraphQL server generated from a schema file (`@neo4j/graphql` v7 on GraphQL Yoga), and a typed React app, run together with Docker Compose. The sample is a movie and people search, compare and edit app. The default stack has no authentication; an opt-in setup adds Keycloak login, a gateway and row-level rules. Do not expose either publicly.
 
-The project is six repositories kept side by side in one folder: `grandstack` (this one: compose, overview, tutorial, agent guide), `grandstack-server`, `grandstack-web` and `grandstack-auth` (optional auth) `grandstack-agents` (MCP server and agent examples) and `grandstack-federation` (Wikipedia subgraph and gateway). Each has its own `docs/` folder.
+The project is seven repositories kept side by side in one folder: `grandstack` (this one: compose, overview, tutorial, agent guide), `grandstack-server`, `grandstack-web` and `grandstack-auth` (optional auth) `grandstack-agents` (MCP server and agent examples), `grandstack-federation` (Wikipedia subgraph and gateway) and `grandstack-web-aura` (a web UI for managing Neo4j Aura). Each has its own `docs/` folder.
 
 ## Start here
 
@@ -20,6 +20,7 @@ Annotated architecture diagrams are SVG files in each repository's `docs/diagram
 - [Configuration](docs/configuration.md): compose services, ports, settings, Podman, resetting data
 - [Versioning and releases](docs/versioning-and-releases.md): tags, what is released, how to cut a release
 - [Releasing, CI and the website](docs/releasing.md): GitHub workflows, the release button, images, website regeneration
+- [Building on GRANDstack](docs/building-on-grandstack.md): the rule for a new repository or setup: build on the blocks, improve a block rather than copy it, a checklist, the warning signs of a silo
 - [Roadmap](docs/roadmap.md): phase status; agents and federation are done; planned (not built yet): agent memory, site
 
 ## Other repositories (paths inside each repository)
@@ -28,4 +29,5 @@ Annotated architecture diagrams are SVG files in each repository's `docs/diagram
 - grandstack-web `docs/architecture.md`, `docs/features.md`, `docs/customising.md`, `docs/recipes.md`, `docs/testing.md`, `e2e/README.md`, `AGENTS.md`
 - grandstack-auth `docs/how-it-works.md`, `docs/role-and-scope-model.md`, `docs/keycloak.md`, `docs/client.md`, `docs/recipes.md`, `docs/testing.md`, `docs/swapping-providers.md`, `docs/auth0.md` (untested), `docs/troubleshooting.md`, `docs/exercise-add-auth-to-grandstack-web.md` (a follow-up exercise), `AGENTS.md`
 - grandstack-agents `docs/how-it-works.md`, `docs/mcp-server.md`, `docs/direct-graphql.md`, `docs/agent-loop.md`, `docs/adding-auth.md`, `docs/schema-design-for-agents.md`, `docs/guardrails.md`, `docs/recipes.md`, `docs/testing.md`, `docs/troubleshooting.md`, `AGENTS.md`
+- grandstack-web-aura `docs/architecture.md`, `docs/features.md`, `docs/customising.md`, `docs/recipes.md`, `docs/testing.md`, `docs/deploying.md`, `docs/real-account-checklist.md`, `AGENTS.md`
 - grandstack-federation `docs/how-it-works.md`, `docs/subgraphs.md`, `docs/linking.md`, `docs/composition.md`, `docs/prototype-findings.md`, `docs/recipes.md`, `docs/exercise-show-wikipedia-in-grandstack-web.md`, `docs/testing.md`, `docs/troubleshooting.md`, `AGENTS.md`
