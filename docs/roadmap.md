@@ -13,6 +13,7 @@ The plan has seven phases. Phases 1 to 4, 6 and 7 are done (phase 5, agent memor
 | 5. Agent memory | Planned | Its own repo: an attempt-memory graph in a separate Neo4j (the community edition has one database per instance, so a second container), with auth introduced there. |
 | 6. Federation | Done | `grandstack-federation`: the server as a federation subgraph (`FEDERATION=true`), a Wikipedia subgraph that adds a summary, image and link to films and people, composed by Mesh's compose CLI and served by Hive Gateway. Films and people are linked to Wikipedia pages by a committed, rule-checked links file (152 of 152 films, 461 of 464 people). Opt-in through `compose.federation.yaml`; needs internet. Mesh's OpenAPI handler was tried and not used (see that repo's `docs/prototype-findings.md`). Auth with federation is not built. |
 | 7. Site | Done (deployment not verified here) | https://www.grandstack.ai, a Hugo site in its own repo (`grand-stack.github.io`) with a hand-written theme: home, quickstart, the docs of every repo (a generated copy), examples that are run against real stacks, this roadmap, a page for agents, and `llms.txt` and `llms-full.txt`. Built for GitHub Pages; the DNS and Pages settings are the maintainers'. Every repository is Apache-2.0 (LICENSE and NOTICE in each). |
+| 8. Aura management | Done on branches, not merged | `grandstack-web-aura`: a web UI for managing Neo4j Aura. It needed `grandstack-server` to learn `MODEL` (which model runs, one at a time) and `READ_ONLY`; the Aura setup is `compose.aura.yaml`, using the federation gateway image with its own config. Waits on a server release before the other repositories can use `main`. |
 
 ## What each phase will change in what you read here
 
@@ -20,6 +21,7 @@ The plan has seven phases. Phases 1 to 4, 6 and 7 are done (phase 5, agent memor
 - **Phase 4 is done**: `grandstack-agents` adds an MCP endpoint and a direct-GraphQL example; the schema descriptions the lint rule already requires are what an agent reads. It is read-only by default but the server behind it is open; see its `docs/guardrails.md`.
 - **Phase 5** will add an agent-memory repository with its own Neo4j and auth.
 - **Phase 6 is done**: `grandstack-federation` adds a gateway on port 4000, with the server moving to port 4001 in that setup.
+- **Phase 8 (Aura management) is built on branches**: `grandstack-server` gains `MODEL` and `READ_ONLY`, and `compose.aura.yaml` runs a web UI for Aura on ports 3000 and 4000 (replacing the other setups there), with the web app on its own web server and a fake Aura by default.
 - **Phase 7 is done**: the docs are published as https://www.grandstack.ai (built from the repos by a sync script), and `llms.txt` there is the public index.
 
 ## Things to verify before relying on them
