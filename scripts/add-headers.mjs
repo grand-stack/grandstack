@@ -13,7 +13,7 @@ import { fileURLToPath } from "node:url";
 const ws = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const script = join(ws, ".github", "scripts", "headers.mjs");
 if (!existsSync(script)) { console.error(`Expected the .github repository at ${join(ws, ".github")}`); process.exit(2); }
-const repos = [".github", "grandstack", "grandstack-server", "grandstack-web", "grandstack-auth", "grandstack-agents", "grandstack-federation", "grand-stack.github.io"];
+const repos = [".github", "grandstack", "grandstack-server", "grandstack-web", "grandstack-auth", "grandstack-agents", "grandstack-federation", "grandstack-web-aura", "grand-stack.github.io"];
 let failed = false;
 for (const repo of repos) {
   if (!existsSync(join(ws, repo))) continue;
