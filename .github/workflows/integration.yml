@@ -24,23 +24,23 @@ jobs:
       matrix:
         setup: [default, agents, auth, federation, aura]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { path: work/grandstack }
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { repository: "${{ github.repository_owner }}/grandstack-server", path: work/grandstack-server }
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { repository: "${{ github.repository_owner }}/grandstack-web", path: work/grandstack-web }
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { repository: "${{ github.repository_owner }}/grandstack-auth", path: work/grandstack-auth }
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { repository: "${{ github.repository_owner }}/grandstack-agents", path: work/grandstack-agents }
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { repository: "${{ github.repository_owner }}/grandstack-federation", path: work/grandstack-federation }
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { repository: "${{ github.repository_owner }}/grandstack-web-aura", path: work/grandstack-web-aura }
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { repository: "${{ github.repository_owner }}/grand-stack.github.io", path: work/grand-stack.github.io }
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with: { node-version: 24 }
       - name: ${{ matrix.setup }} setup
         id: checks
