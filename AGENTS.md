@@ -2,6 +2,7 @@
 
 Compose stack plus the overview docs for GRANDstack (GraphQL on Neo4j: `grandstack-server`, `grandstack-web`). Read [docs/agents.md](docs/agents.md) first; it covers the mental model, where to change what, the verification checklist and the gotchas. [llms.txt](llms.txt) indexes everything.
 
+- **Build on the blocks; do not make a silo.** A new repository or setup must be made from what GRANDstack already provides (the `grandstack-server` image and its models, the `grandstack-federation` gateway, `grandstack-auth`, `grandstack-agents`, compose overlays in the `grandstack` repository), and improve a block when it falls short rather than copying or working around it. Read [building on GRANDstack](docs/building-on-grandstack.md) before creating a repository, a compose file, a server, a gateway or a docs structure. Providing building blocks that people shape into their own solution is a goal of the project.
 - Start: `cp .env.example .env && docker compose up --build` (web :3000, GraphQL :4000/graphql, Neo4j :7474). The three repos must sit side by side because compose builds from `../grandstack-server` and `../grandstack-web`.
 - `docker compose down -v` deletes the Neo4j data; the sample reseeds on the next start.
 - Change the schema, seed or server behaviour in `grandstack-server`; change the UI in `grandstack-web`; follow each repo's `AGENTS.md` and `docs/recipes.md`.
