@@ -22,7 +22,7 @@ case "$setup" in
   agents)     files="-f compose.yaml -f compose.agents.yaml" ;;
   auth)       files="-f compose.yaml -f compose.auth.yaml" ;;
   federation) files="-f compose.yaml -f compose.federation.yaml" ;;
-  aura)       files="-f compose.yaml -f compose.aura.yaml" ;;
+  aura)       files="-f compose.yaml -f compose.aura.yaml -f compose.aura-mock.yaml" ;;
   *) echo "unknown setup: $setup" >&2; exit 2 ;;
 esac
 if [ -z "${CHROME_PATH:-}" ]; then
@@ -79,7 +79,7 @@ case "$setup" in
     examples ;;
   aura)
     wait_for http://localhost:3000/ "the web app" 120
-    # the browser checks run against the fake Aura (mock-aura, published on loopback by compose.aura.yaml); the website has no examples for this setup
+    # the browser checks run against the fake Aura (compose.aura-mock.yaml, mock-aura published on loopback), never the real one; the website has no examples for this setup
     step "aura browser checks"; (cd "$ws/grandstack-web-aura" && npm ci && BASE_URL=http://localhost:3000 npm run e2e -w web) ;;
 esac
 step "all checks passed"

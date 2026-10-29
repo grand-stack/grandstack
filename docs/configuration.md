@@ -55,19 +55,20 @@ It needs internet for the Wikipedia part, and it replaces the default, auth and 
 
 ### With Aura management: `compose.aura.yaml`
 
-An override file, used together with `compose.yaml`: `docker compose -f compose.yaml -f compose.aura.yaml up --build`. It needs `SECRET_KEY` in `.env` (`../grandstack-web-aura/scripts/init-env.sh` makes it). It changes and adds:
+An override file, used together with `compose.yaml`: `docker compose -f compose.yaml -f compose.aura.yaml up --build`. It talks to the **real Aura API** by default. It needs `SECRET_KEY` in `.env` (`../grandstack-web-aura/scripts/init-env.sh` makes it). It changes and adds:
 
 | Service | Detail |
 | --- | --- |
 | `neo4j` | its own volume (`neo4j-aura-data`), ports on `127.0.0.1` only, and a second network `store` |
 | `server` | `MODEL=aura` (mounts `../grandstack-web-aura/models`), `READ_ONLY=true`, `FEDERATION=true`; host port 4001; starts after `store-writer` |
 | `store-writer` (new) | the same image and model, writable, on the private `store` network only, no published port |
-| `aura` (new) | built from `../grandstack-web-aura`; the Aura subgraph, port 4010; needs `SECRET_KEY`; `AURA_BASE_URL` defaults to the fake Aura |
-| `mock-aura` (new) | built from `../grandstack-web-aura`; a fake Aura API, port 4020 |
+| `aura` (new) | built from `../grandstack-web-aura`; the Aura subgraph, port 4010; needs `SECRET_KEY`; `AURA_BASE_URL` defaults to `https://api.neo4j.io` |
 | `gateway` (new) | built from `../grandstack-federation/gateway`, with `../grandstack-web-aura/gateway/supergraph.graphql` and `gateway.config.ts` mounted over its own; port 4000 |
 | `web` | built from `../grandstack-web-aura`, **replacing the Movies app**; http://localhost:3000; it forwards `/graphql` to the gateway |
 
 Everything is bound to `127.0.0.1`, because the app can delete databases and has no sign-in. It replaces the default, auth, agents and federation setups on ports 3000 and 4000. `compose.aura-edge.yaml` adds a TLS and sign-in edge on port 8443 and removes every other published port. Ports in the Aura setup: 3000 web, 4000 gateway, 4001 read-only server, 4010 Aura subgraph, 4020 fake Aura, 7474 and 7687 Neo4j.
+
+For development and tests add **`compose.aura-mock.yaml`**: it starts `mock-aura` (built from `../grandstack-web-aura`, a fake Aura API on port 4020, published on this machine only), makes `aura` wait for it, and sets `AURA_BASE_URL` to the fake and `ALLOW_INSECURE_AURA_URL=true`. The address is fixed, not read from `.env`, so a real `AURA_BASE_URL` there cannot send a test to the real Aura. Connect to it with `mock-client` and `mock-secret`.
 
 **Do not run `docker compose down -v` with the default project name to reset the Aura setup beside a Movies stack you want to keep:** the merged files include the Movies data volume as well as the Aura one, and `-v` removes both. Use `-p aura` for the Aura setup.
 

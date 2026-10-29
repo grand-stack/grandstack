@@ -1,0 +1,26 @@
+# Copyright (c) "Neo4j"
+# Neo4j Sweden AB [http://neo4j.com]
+# For development and tests only: points the Aura setup at a fake Aura (mock-aura, from the grandstack-web-aura repository, checked against
+# Aura's own OpenAPI file) instead of the real API, so nothing can create, change or delete a real instance. Use together with the others:
+#   docker compose -f compose.yaml -f compose.aura.yaml -f compose.aura-mock.yaml up --build
+# Connect with the client ID `mock-client` and the secret `mock-secret`. The fake starts with 3 tenants and 6 instances, and the browser
+# checks in grandstack-web-aura run against it. It publishes its port on this machine only, because the checks change it directly.
+services:
+  aura:
+    environment:
+      # Fixed, not taken from .env: a real AURA_BASE_URL there must never send a test to the real Aura
+      AURA_BASE_URL: http://mock-aura:4020
+      # Plain http, for the fake only. The real address must be https.
+      ALLOW_INSECURE_AURA_URL: "true"
+    depends_on:
+      mock-aura:
+        condition: service_started
+
+  mock-aura:
+    build:
+      context: ../grandstack-web-aura
+      dockerfile: mock-aura/Dockerfile
+    environment:
+      MOCK_STEP_MS: ${MOCK_STEP_MS:-3000}
+    ports:
+      - "127.0.0.1:4020:4020"

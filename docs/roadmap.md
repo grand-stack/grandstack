@@ -21,7 +21,7 @@ The plan has seven phases. Phases 1 to 4, 6 and 7 are done (phase 5, agent memor
 - **Phase 4 is done**: `grandstack-agents` adds an MCP endpoint and a direct-GraphQL example; the schema descriptions the lint rule already requires are what an agent reads. It is read-only by default but the server behind it is open; see its `docs/guardrails.md`.
 - **Phase 5** will add an agent-memory repository with its own Neo4j and auth.
 - **Phase 6 is done**: `grandstack-federation` adds a gateway on port 4000, with the server moving to port 4001 in that setup.
-- **Phase 8 (Aura management) is built on branches**: `grandstack-server` gains `MODEL` and `READ_ONLY`, and `compose.aura.yaml` runs a web UI for Aura on ports 3000 and 4000 (replacing the other setups there), with the web app on its own web server and a fake Aura by default.
+- **Phase 8 (Aura management) is built on branches**: `grandstack-server` gains `MODEL` and `READ_ONLY`, and `compose.aura.yaml` runs a web UI for Aura on ports 3000 and 4000 (replacing the other setups there), with the web app on its own web server. It talks to the real Aura API by default; a fake Aura is a separate overlay for tests.
 - **Phase 7 is done**: the docs are published as https://www.grandstack.ai (built from the repos by a sync script), and `llms.txt` there is the public index.
 
 ## Things to verify before relying on them

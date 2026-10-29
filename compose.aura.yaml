@@ -5,9 +5,10 @@
 # gateway composes the two. Use together with compose.yaml:
 #   echo "SECRET_KEY=$(openssl rand -base64 32)" >> .env        # once; seals the Aura client secret. Keep it.
 #   docker compose -f compose.yaml -f compose.aura.yaml up --build
-# It points at a fake Aura (mock-aura) unless AURA_BASE_URL is set, so no real account is touched by default. It replaces the other
-# setups on ports 3000 and 4000, and uses its own Neo4j volume, so the Movies data and the Aura data never mix. Open, no sign-in:
-# everything is published on this machine only. For TLS and a sign-in, add compose.aura-edge.yaml.
+# It talks to the REAL Aura API (https://api.neo4j.io) with the client ID and secret you enter in the app, so a change you confirm
+# changes your account. To try it without a real account (development and tests), add compose.aura-mock.yaml, which points it at a fake
+# Aura. It replaces the other setups on ports 3000 and 4000, and uses its own Neo4j volume, so the Movies data and the Aura data never
+# mix. Open, no sign-in: everything is published on this machine only. For TLS and a sign-in, add compose.aura-edge.yaml.
 services:
   neo4j:
     # Its own volume, and published on this machine only
@@ -81,9 +82,8 @@ services:
       NEO4J_PASSWORD: ${NEO4J_PASSWORD:-grandstack-dev}
       STORE_WRITER_URL: http://store-writer:4000/graphql
       SECRET_KEY: "${SECRET_KEY:?Set SECRET_KEY in .env first, as described at the top of compose.aura.yaml}"
-      # The fake Aura by default. For a real account set AURA_BASE_URL=https://api.neo4j.io (ALLOW_INSECURE_AURA_URL then has no effect).
-      AURA_BASE_URL: ${AURA_BASE_URL:-http://mock-aura:4020}
-      ALLOW_INSECURE_AURA_URL: ${ALLOW_INSECURE_AURA_URL:-true}
+      # The real Aura API. compose.aura-mock.yaml points this at a fake one for development and tests, and allows plain http for it.
+      AURA_BASE_URL: ${AURA_BASE_URL:-https://api.neo4j.io}
       SYNC_INTERVAL_MS: ${SYNC_INTERVAL_MS:-900000}
     ports:
       - "127.0.0.1:4010:4010"
@@ -99,18 +99,6 @@ services:
     depends_on:
       store-writer:
         condition: service_healthy
-      mock-aura:
-        condition: service_started
-
-  # A fake of the Aura API, checked against Aura's own OpenAPI file. Credentials: mock-client / mock-secret.
-  mock-aura:
-    build:
-      context: ../grandstack-web-aura
-      dockerfile: mock-aura/Dockerfile
-    environment:
-      MOCK_STEP_MS: ${MOCK_STEP_MS:-3000}
-    ports:
-      - "127.0.0.1:4020:4020"
 
   # The federation gateway image from grandstack-federation, with this setup's own supergraph and gateway config mounted over its own.
   gateway:

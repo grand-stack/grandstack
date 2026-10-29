@@ -93,7 +93,7 @@ Replaces the Movies app with a web UI for managing Neo4j Aura. The same server i
 docker compose -f compose.yaml -f compose.aura.yaml up --build
 ```
 
-It points at a **fake Aura** (mock-aura, credentials `mock-client` / `mock-secret`) unless `AURA_BASE_URL` is set, so no real account is touched by default. The app is at http://localhost:3000 and the gateway at http://localhost:4000/graphql. It replaces the other setups on those ports, uses its own Neo4j volume so Movies and Aura data never mix, and publishes everything on this machine only. It has **no sign-in**: for TLS and a sign-in, which is the way to reach it from a phone, add `-f compose.aura-edge.yaml` (see [`grandstack-web-aura`](docs/architecture.md#aura-management-opt-in)). It can delete databases when pointed at a real account, so read that repository's `docs/real-account-checklist.md` first.
+It talks to the **real Aura API** with the client ID and secret you enter in the app, so a change you confirm changes your account. To try it without a real account, add `-f compose.aura-mock.yaml`, which starts a fake Aura (credentials `mock-client` / `mock-secret`) and fixes the address to it; that is for development and tests. The app is at http://localhost:3000 and the gateway at http://localhost:4000/graphql. It replaces the other setups on those ports, uses its own Neo4j volume so Movies and Aura data never mix, and publishes everything on this machine only. It has **no sign-in**: for TLS and a sign-in, which is the way to reach it from a phone, add `-f compose.aura-edge.yaml` (see [`grandstack-web-aura`](docs/architecture.md#aura-management-opt-in)). It can delete databases, so read that repository's `docs/real-account-checklist.md` first.
 
 ## Repositories
 

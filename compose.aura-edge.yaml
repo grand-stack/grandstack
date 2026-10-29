@@ -12,8 +12,6 @@ services:
     ports: !reset []
   aura:
     ports: !reset []
-  mock-aura:
-    ports: !reset []
   gateway:
     ports: !reset []
   web:
