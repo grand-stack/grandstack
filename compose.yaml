@@ -2,7 +2,7 @@
 # Neo4j Sweden AB [http://neo4j.com]
 services:
   neo4j:
-    image: neo4j:2026.10.0-community@sha256:388c0e5c6d4543e3d0e6cee3d1e751c05ad9314aa73342cc63cd0ea0946e38bb
+    image: neo4j:2026.10.2-community@sha256:4a2fd4f41ce384aa7d6a74b399f22c202e154f3966119c28a18ed9a500904f5e
     environment:
       NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-grandstack-dev}
     ports:
